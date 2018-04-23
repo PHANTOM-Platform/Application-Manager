@@ -7,7 +7,7 @@ This server allows users to suscribe by using websockets to get notifications on
 Such notifications consists on forwarding a copy of the uploaded json.
 
 ## 1.- Introduction
-The PHANTOM APP-MAANAGER server is composed of two components: a web server (http://) and a WebSocket server (ws://). 
+The PHANTOM APP-MANAGER server is composed of two components: a web server (http://) and a WebSocket server (ws://). 
 The web server provides various functionalities for data query and data analysis via RESTful APIs with documents in JSON format. 
 The server's URL is "http://localhost:8500" by default.
 
