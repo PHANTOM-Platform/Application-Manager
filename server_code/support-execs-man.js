@@ -15,18 +15,15 @@
 //     See the License for the specific language governing permissions and
 //     limitations under the License.
 
-var my_type = 'tasks' 
-
-const CommonModule 		= require('./support-common');
+const CommonModule 	= require('./support-common');
 
 module.exports = { 
-	compose_query: function(project ){ 
+compose_query: function(app ){ 
 	var mquery=undefined;
-	if (project != undefined)
-	if (project.length > 0){
-		mquery=[{"match_phrase":{"project":project}},{"term":{"project_length":project.length}}];
-	}  
-// 	console.log("mquery is " +JSON.stringify(mquery));
+	if (app != undefined)
+	if (app.length > 0){
+		mquery=[{"match_phrase":{"app":app}},{"term":{"app_length":app.length}}];
+	}
 	if(mquery!=undefined ){
 		mquery={"query":{"bool":{"must": mquery }}};
 	}else{ 
@@ -34,7 +31,16 @@ module.exports = {
 	}
 	return mquery;
 },
-register_json: function(es_server, my_index, body, remoteAddress) {
+compose_query_id: function(id_string ){ 
+	var mquery;
+	if (id_string != undefined) {
+		mquery={"query":{"match":{"_id":id_string}}};
+	}else{ 
+		mquery={"query":{"match_all": {} }};
+	}
+	return mquery;
+}, 
+register_json: function(es_server, my_index, body, remoteAddress, my_type) {
 	return new Promise( (resolve,reject) => {
 		var size =0;
 		var elasticsearch = require('elasticsearch');
@@ -65,12 +71,25 @@ register_json: function(es_server, my_index, body, remoteAddress) {
 				});
 			}
 		});
-	}); 
+	});
 }, //end register_json
-//****************************************************
-//This function is used to confirm that a project exists or not in the DataBase.
+//***************************************************
+register_exec_json: function(es_server, my_index, body, remoteAddress) {
+	const my_type = 'executions_status' ; 
+	return new Promise( (resolve,reject) => {
+	var result =  this.register_json (es_server, my_index, body, remoteAddress, my_type) ;
+	result.then((resultResolve) => {
+		resolve (resultResolve); 
+	},(resultReject)=> {
+		reject (resultReject);  
+	}); 
+	});
+}, //end register_exec_json 
+//***************************************************  
+//This function is used to confirm that a app exists or not in the DataBase.
 //We first counted if existence is >0
-find_project_id: function(es_server, my_index, project){ 
+find_exec_id: function(es_server, my_index, app){
+	const my_type = 'executions_status' ;
 	return new Promise( (resolve,reject) => {
 		var elasticsearch = require('elasticsearch');
 		var client = new elasticsearch.Client({
@@ -79,10 +98,10 @@ find_project_id: function(es_server, my_index, project){
 		});
 		client.search({
 			index: my_index,
-			type: my_type, 
+			type: my_type,
 			body: {
 				"query":{"bool":{"must":[
-						{"match_phrase":{"project": project }}, {"term":{"project_length": project.length}}
+					{"match_phrase":{"app": app }}, {"term":{"app_length": app.length}}
 				]}}
 			}
 		}, function(error, response) {
@@ -93,11 +112,12 @@ find_project_id: function(es_server, my_index, project){
 			}
 		});
 	});
-},
-//****************************************************
-//This function is used to confirm that a project exists or not in the DataBase.
+},//find_exec_id
+//****************************************************  
+//This function is used to confirm that a execution exists or not in the DataBase.
 //We first counted if existence is >0
-find_project: function(es_server, my_index, project, pretty){ 
+find_exec: function(es_server, my_index, app, pretty){ 
+	const my_type = 'executions_status' ;
 	return new Promise( (resolve,reject) => {
 		var elasticsearch = require('elasticsearch');
 		var client = new elasticsearch.Client({
@@ -109,7 +129,7 @@ find_project: function(es_server, my_index, project, pretty){
 			type: my_type, 
 			body: {
 				"query":{"bool":{"must":[
-						{"match_phrase":{"project": project }}, {"term":{"project_length": project.length}}
+					{"match_phrase":{"app": app }}, {"term":{"app_length": app.length}}
 				]}}
 			}
 		}, function(error, response) {
@@ -125,17 +145,18 @@ find_project: function(es_server, my_index, project, pretty){
 			}
 		});
 	});
-},	
+},
 //****************************************************
 //This function is used to confirm that an user exists or not in the DataBase.
-query_count_project: function(es_server, my_index, project){ 
+query_count_exec_id: function(es_server, my_index, exec_id){ 
+	const my_type = 'executions_status' ;
 	return new Promise( (resolve,reject) => {
 		var elasticsearch = require('elasticsearch');
 		var client = new elasticsearch.Client({
 			host: es_server,
 			log: 'error'
 		});
-		if(project==undefined){
+		if(exec_id==undefined){
 			resolve(0);
 		}else{
 			client.count({
@@ -143,7 +164,7 @@ query_count_project: function(es_server, my_index, project){
 				type: my_type, 
 				body: {
 					"query":{"bool":{"must":[
-							{"match_phrase":{"project": project }}, {"term":{"project_length": project.length}}
+						{"match_phrase":{"_id": exec_id }} 
 					]}}
 				}
 			}, function(error, response) {
@@ -158,9 +179,44 @@ query_count_project: function(es_server, my_index, project){
 			});
 		}
 	});
-}, //end query_count_project		
-//**********************************************************
-query_metadata: function(es_server, my_index, bodyquery, pretty) {
+}, //end query_count_exec_id
+//****************************************************
+//This function is used to confirm that an user exists or not in the DataBase.
+query_count_exec: function(es_server, my_index, app){ 
+	const my_type = 'executions_status' ;
+	return new Promise( (resolve,reject) => {
+		var elasticsearch = require('elasticsearch');
+		var client = new elasticsearch.Client({
+			host: es_server,
+			log: 'error'
+		});
+		if(app==undefined){
+			resolve(0);
+		}else{
+			client.count({
+				index: my_index,
+				type: my_type, 
+				body: {
+					"query":{"bool":{"must":[
+						{"match_phrase":{"app": app }}, {"term":{"app_length": app.length}}
+					]}}
+				}
+			}, function(error, response) {
+				if (error) { 
+					reject (error);
+				}
+				if (response.count !== undefined) {
+					resolve (response.count);//size
+				}else{
+					resolve (0);//size
+				} 
+			});
+		}
+	});
+}, //end query_count_exec
+//**************************************************** 
+query_exec: function(es_server, my_index, bodyquery, pretty) {
+	const my_type = 'executions_status';
 	return new Promise( (resolve,reject) => {
 		var elasticsearch = require('elasticsearch');
 		var client = new elasticsearch.Client({
@@ -194,5 +250,6 @@ query_metadata: function(es_server, my_index, bodyquery, pretty) {
 			resolve("{\"hits\" :["+result+"]}");
 		});
 	});
-}//end get_metadata		
+}//end query_exec 
+	
 }//end module.exports
