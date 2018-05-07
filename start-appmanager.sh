@@ -19,8 +19,11 @@
 	appmanager_port=8500;
 	cd server_code;
 # IF THE SERVER WAS RUNNING, WE STOP IT BEFORE START A NEW INSTANCE
-	bash ../stop-manager.sh
+	bash ../stop-appmanager.sh
 # START A NEW INSTACE OF THE APPMANAGER
+	if [ ! -d node_modules ]; then
+		ln -s ~/phantom_servers/node_modules node_modules;
+	fi;
 	${DIST_DIR}/nodejs/bin/node appmanager_app.js &
 	pid=$!;
 	echo "pid if the server is ${pid}";
