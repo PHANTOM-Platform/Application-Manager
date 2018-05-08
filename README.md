@@ -11,6 +11,12 @@ The PHANTOM APP-MANAGER server is composed of two components: a web server (http
 The web server provides various functionalities for data query and data analysis via RESTful APIs with documents in JSON format. 
 The server's URL is "http://localhost:8500" by default.
 
+<p align="center">
+<a href="https://github.com/PHANTOM-Platform/Application-Manager/blob/master/appmanager_view.png">
+<img src="https://github.com/PHANTOM-Platform/Application-Manager/blob/master/appmanager_view.png" align="middle" width="50%" height="50%" title="Schema" alt="Repository Schema">
+</a> </p>
+
+
 ## 2.- Prerequisites
 The server is implemented using Node.js, and connects to Elasticsearch to store and access Metadata. 
 Before you start installing the required components, please note that the installation and setup steps mentioned below assume that you are running a current Linux as the operating system. 
