@@ -21,7 +21,8 @@ process.title = 'PHANTOM-Manager-server';
 	const es_servername = 'localhost';
 	const es_port = 9400;
 	const ips = ['::ffff:127.0.0.1','127.0.0.1',"::1"];
-	const SERVERNAME ="PHANTOM Manager (APP + Resources + Executions)";
+	const SERVERNAMElong ="PHANTOM Manager (APP + Resources + Executions)";
+	const SERVERNAME ='PHANTOM Manager';
 	const SERVERPORT = 8500;
 	const SERVERDB = "manager_db";
 	
@@ -349,6 +350,7 @@ function update_filename_path_on_json(JSONstring, filename, path){
 	new_json['path_length']	=path.length; //label can not contain points '.' !
 	new_json['filename']	=filename;
 	new_json['filename_length']=filename.length;
+	new_json=(JSON.stringify(new_json));
 	return new_json;
 }
 
@@ -400,17 +402,17 @@ function get_source_project_json(JSONstring){
 	return myres;
 }
 //*********************************************************************	
-function generate_json_example(){ 
-	var Employee = {
-		firstname: "Pedro",
-		lastname: "Picapiedra"
-	} 
-	console.log(Employee);
-	delete Employee.firstname; //delete one property
-	var label='age';
-	Employee[label]="32";		//add one property
-	console.log(Employee);
-}
+// function generate_json_example(){ 
+// 	var Employee = {
+// 		firstname: "Pedro",
+// 		lastname: "Picapiedra"
+// 	} 
+// 	console.log(Employee);
+// 	delete Employee.firstname; //delete one property
+// 	var label='age';
+// 	Employee[label]="32";		//add one property
+// 	console.log(Employee);
+// }
 //*********************************************************************
 //report on the screen the list of fields, and values
 function get_value_json(JSONstring,label){
@@ -509,11 +511,15 @@ app.use(fileUpload());
 /* GET home page. */
 app.get('/', function(req, res, next) {	
 	var json = {};
-	json.message = SERVERNAME + "server is up and running."
+	json.message = SERVERNAMElong + " server is up and running."
 	json.release = req.app.get('version');
 	json.versions = [ 'v1' ];
 	json.current_time = dateFormat(new Date(), "yyyy-mm-dd'T'HH:MM:ss.l");
 	res.json(json);
+});
+//**********************************************************
+app.get('/servername', function(req, res, next) {
+	res.end(SERVERNAME);
 });
 //**********************************************************
 app.get('/upload_file.html', function(req, res) {
@@ -554,9 +560,9 @@ app.get('/verify_es_connection', function(req, res) {
 		res.writeHead(rescode.statusCode, { 'Content-Type': contentType_text_plain });
 		res.end(""+rescode.statusCode, 'utf-8');
 	}).on('error', function(e) {
-		console.error(e);
-		res.writeHead(000, { 'Content-Type': contentType_text_plain });
-		res.end("000", 'utf-8');		
+// 		console.error(e); //if not reply is expected an ECONNREFUSED ERROR, we return 503 as not available service
+		res.writeHead(503, { 'Content-Type': contentType_text_plain });
+		res.end("503", 'utf-8');		
 	}); 
 });
 //**********************************************************
@@ -872,7 +878,7 @@ function register_device(req, res,new_device){
 	jsontext =update_device_length_on_json(jsontext, devicename); //this adds the field device.length 
 	
 // 	console.log("send_device_update_to_suscribers("+devicename+")");
-	send_device_update_to_suscribers(devicename,jsontext );	
+	send_device_update_to_suscribers(devicename,jsontext);
 	var result_count = DeviceModule.query_count_device(es_servername + ":" + es_port,SERVERDB, devicename);
 	result_count.then((resultResolve) => {
 		if(resultResolve==0){//new entry (2) we resister new entry  
@@ -1598,8 +1604,8 @@ function send_project_update_to_suscribers(projectname,jsontext){
 		for (var u = 0; u < max_users; u++) {
 			var found_sucrip=false;
 			var i=0; 
-			while(i< total_project_suscriptions[u] && found_sucrip==false){//total_device_suscriptions total_exec_suscriptions
-				if(ProjectSubscriptions[u,i]==projectname){//DeviceSubscriptions  ExecSubscriptions
+			while(i< total_project_suscriptions[u] && found_sucrip==false){
+				if(ProjectSubscriptions[u,i]==projectname){
 					found_sucrip=true;
 				}else{
 					i++;
