@@ -78,6 +78,13 @@ fi;
 		echo "PHANTOM APP MANAGER Doesn't get Response from the ElasticSearch Server. Aborting.";
 		exit 1;
 	fi; 
+# Look which kind of server is listening
+	SERVERNAME=$(curl --silent http://${server}:${appmanager_port}/servername);
+	if [[ ${SERVERNAME} != "PHANTOM Manager" ]]; then
+		echo " The server found is not a PHANTOM Manager server. Aborting.";
+		echo ${SERVERNAME};
+		exit 1;
+	fi;
 ######## Register of the new user ###################################################
 HTTP_STATUS=$(curl -XPOST --silent --output /dev/null --write-out "%{http_code}" http://${server}:${appmanager_port}/signup?email="${email}"\&pw="${password}"); 
 #We sync, because it may start the next command before this operation completes.

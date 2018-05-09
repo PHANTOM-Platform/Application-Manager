@@ -80,9 +80,16 @@ fi;
 	if [[ ${HTTP_STATUS} != "200" ]]; then
 		echo "PHANTOM APP MANAGER Doesn't get Response from the ElasticSearch Server. Aborting.";
 		exit 1;
-	fi; 
+	fi;
+	# Look which kind of server is listening
+	SERVERNAME=$(curl --silent http://${server}:${appmanager_port}/servername);
+	if [[ ${SERVERNAME} != "PHANTOM Manager" ]]; then
+		echo " The server found is not a PHANTOM Manager server. Aborting.";
+		echo ${SERVERNAME};
+		exit 1;
+	fi;
 ######## DONWLOAD file and metadata ###################################################  
-	resp=$(curl -s -H "Authorization: OAuth ${mytoken}" -H "Content-Type: multipart/form-data" --write-out "\n%{http_code}" -XGET http://${server}:${appmanager_port}/query_metadata?project=\"${project}\");	
+	resp=$(curl -s -H "Authorization: OAuth ${mytoken}" -H "Content-Type: multipart/form-data" --write-out "\n%{http_code}" -XGET http://${server}:${appmanager_port}/query_metadata?project=\"${project}\");
 	HTTP_STATUS="${resp##*$'\n'}";
 	content="${resp%$'\n'*}";
 	#We sync, because it may start the next command before this operation completes.

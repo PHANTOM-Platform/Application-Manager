@@ -64,8 +64,7 @@ elif [ $# -eq 4 ]; then
 			nuevo=true;
 			last=$i;
 		fi;
-	done; 
-
+	done;
 # 	echo "Checking Response on port ${port} ..."
 	let "j=0"; 
 	# HTTP_STATUS=$(curl --silent --write-out "HTTPSTATUS:%{http_code}" http://${server}:${port} | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')

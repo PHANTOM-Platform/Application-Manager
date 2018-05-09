@@ -22,6 +22,26 @@ appmanager_port="8500";
 app=`basename $0`;
 cd `dirname $0`;
 source colors.sh;
+################### Testing connectivity with the PHANTOM APP MANAGER server: #############
+	source verify_connectivity.sh -s ${server} -port ${appmanager_port};
+	conectivity=$?;
+	if [ ${conectivity} -eq 1 ]; then
+		echo "[ERROR:] Server \"${server}\" is unreachable on port \"${appmanager_port}\".";
+		exit 1;
+	fi;
+##### Testing if the PHANTOM APP MANAGER server can access to the Elasticsearch Server ####
+	HTTP_STATUS=$(curl -s http://${server}:${appmanager_port}/verify_es_connection);
+	if [[ ${HTTP_STATUS} != "200" ]]; then
+		echo "PHANTOM APP MANAGER Doesn't get Response from the ElasticSearch Server. Aborting.";
+		exit 1;
+	fi;
+# Look which kind of server is listening
+	SERVERNAME=$(curl --silent http://${server}:${appmanager_port}/servername);
+	if [[ ${SERVERNAME} != "PHANTOM Manager" ]]; then
+		echo " The server found is not a PHANTOM Manager server. Aborting.";
+		echo ${SERVERNAME};
+		exit 1;
+	fi;
 # 3. ################## DELETE DATABASE ###################################
 	echo -e "\n${LIGHT_BLUE}";
 	echo "bash delete_db.sh -s ${server} -port ${appmanager_port} ;"
