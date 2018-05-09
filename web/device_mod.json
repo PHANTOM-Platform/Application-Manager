@@ -1,0 +1,10 @@
+{
+  "device": "HLRS Raspberry pi3",
+  "cpu_type": "armv7",
+  "cpu_cores": 8,
+  "ram_size_bytes": 1073741824,
+  "gpu_type":"NA",
+  "fpga_type":"NA",
+  "fpga_logic_gates":0,
+  "hide": "false"
+}

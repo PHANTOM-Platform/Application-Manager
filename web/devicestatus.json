@@ -1,0 +1,9 @@
+{
+	"device": "HLRS Raspberry pi3", 
+	"cpu_load": 90.0,
+	"ram_load": 13.0,
+	"swap_load": 2.0,
+	"network_load": 10.0,
+	"io_load": 12312,
+	"timestamp": "2018-04-10T13:22:55.123"
+}
