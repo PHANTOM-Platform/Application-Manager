@@ -98,7 +98,7 @@
 	echo
 	# 5. ##################  REGISTER A NEW USER ###################################
 	echo -e "\n${LIGHT_BLUE}";
-	echo "curl -XPOST http://${server}:${appmanager_port}/signup?email=\"bob@example.com\"\&pw=\"1234\"";
+	echo "curl -XPOST http://${server}:${appmanager_port}/signup?email=\"montanana@abc.com\"\&pw=\"new\"";
 	read -p $'Press [Enter] key to \033[1;37mREGISTER\033[1;34m the example \033[1;37mUSER\033[1;34m'; echo -ne "${NO_COLOUR}";
 	curl -s -H "Content-Type: application/json" -XPOST http://${server}:${appmanager_port}/signup?email="montana@abc.com"\&pw="new";
 	#We sync, because it may start the next command before this operation completes.
