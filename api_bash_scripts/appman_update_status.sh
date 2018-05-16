@@ -42,36 +42,19 @@ if [ ! $# -eq 0 ]; then
 			elif [ "$last" = "-t" ] || [ "$last" = "-T" ]; then
 				mytoken=$i;
 				nuevo=false;
-# 			elif [ "$last" = "-js" ] || [ "$last" = "-JS" ]; then  #json_string format
-# 				src_json=$i;
-# 				nuevo=false;
-			elif [ "$last" = "-sfp" ] || [ "$last" = "-SFP" ]; then
-				src_file=$i;
-				nuevo=false;
 			elif [ "$last" = "-sjp" ] || [ "$last" = "-SJP" ]; then
 				json_file=$i;
 				nuevo=false;
 
 #project and source are defined in the json file
 				
-				
-			elif [ "$last" = "-df" ] || [ "$last" = "-DF" ]; then
-				dst_file=$i;
-				nuevo=false;
-			elif [ "$last" = "-dp" ] || [ "$last" = "-DP" ]; then
-				dst_path=$i;
-				nuevo=false;
 			elif [ "$i" = "-h" ] || [ "$i" = "-H" ]; then
-				echo -e "${yellow}Script for UPLOADING a new FILE plus METADATA${reset}";
+				echo -e "${yellow}Script for UPDATE stauts of a Device ${reset}";
 				echo -e "${yellow}Syntax ${app}:${reset}";
 				echo -e "${yellow}   Required fields:${reset}";
 				echo -e "${yellow}      authorization token  [-t f7vglñerghpq3ghwoghw] ${reset}";
-				echo -e "${yellow}      source_file_path     [-sfp 1234] ${reset}";   # ../web/example.h      src_file
 				echo -e "${yellow}      source_json_path     [-sjp 1234] ${reset}";   # ../web/exampleh.json  json_file
-# 				echo -e "${yellow}      json_string          [-js 1234] ${reset}";	#  .....   src_json
 
-				echo -e "${yellow}      destination_filename [-df 1234] ${reset}"; # mypath/  dst_path
-				echo -e "${yellow}      destination_path     [-dp 1234] ${reset}";   # main.h dst_file
 				echo -e "${yellow}   Optional fields:${reset}";
 				echo -e "${yellow}      Server [-s phantom.com] ${reset}";
 				echo -e "${yellow}      Port [-port 8000] ${reset}"	;
@@ -94,24 +77,10 @@ if [ ! $# -eq 0 ]; then
 	done; 
 fi;
 
-if [ -z "${src_file}" ]; then
-    echo -e "Missing parameter Input File: sfp\n";
-    exit 1;
-fi;
 if [ -z "${json_file}" ]; then
     echo -e "Missing parameter Input JSON: sjp\n";
     exit 1;
 fi; 
-if [ -z "${dst_path}" ]; then
-	echo -e "Missing parameter Destination Path: dp\n";
-	exit 1;
-fi; 
-if [ -z "${dst_file}" ]; then
-	dst_file=$(basename ${src_file});
-	xpath=${src_file%/*};
-	echo -e "Missing parameter Destination Filename: df";
-	echo -e "We define the destination filename as the same input filename: \"${dst_file}\"";
-fi;
 ################### Testing connectivity with the PHANTOM APP MANAGER server: #############
 	source verify_connectivity.sh -s ${server} -port ${appmanager_port};
 	conectivity=$?;
@@ -133,8 +102,8 @@ fi;
 		exit 1;
 	fi;
 ######## UPLOAD file and metadata ###################################################  
-	resp=$(curl -s -H "Authorization: OAuth ${mytoken}" -H "Content-Type: multipart/form-data" --write-out "\n%{http_code}" -XPOST -F "UploadFile=@${src_file}" -F "UploadJSON=@${json_file}" http://${server}:${appmanager_port}/upload?DestFileName=${dst_file}\&Path=${dst_path});
- 
+	curl -s -H "Authorization: OAuth ${mytoken}" -H "Content-Type: multipart/form-data" --write-out "\n%{http_code}" -XPOST -F "UploadJSON=@${json_file}" http://${server}:${appmanager_port}/update_device_status;
+
 	HTTP_STATUS="${resp##*$'\n'}";
 	content="${resp%$'\n'*}";
 	#We sync, because it may start the next command before this operation completes.
@@ -147,3 +116,6 @@ fi;
 	else #this report is for the case we may get any other kind of response
 			echo "[Log:] HTTP_STATUS: ${HTTP_STATUS}, CONTENT: ${content}";
 	fi;
+
+
+

@@ -54,16 +54,17 @@ source colors.sh;
 	echo "bash verify_token.sh -t ${newtoken} -s ${server} -port ${appmanager_port} ;";
 	read -p $'Press [Enter] key to run the script for \033[1;37mVERIFYING\033[1;34m a token'; echo -ne "${NO_COLOUR}";
 	bash verify_token.sh -t ${newtoken} -s ${server} -port ${appmanager_port} ;
-# 13. ################## TEST OF UPLOADING A JSON FILE (TASK STATUS) WITH A VALID TOKEN, access must be accepted : 200 ##########
+# 13. ################## TEST OF UPDATE, access must be accepted : 200 ##########
 	echo -e "\n${LIGHT_BLUE}";
 	echo -e "We are currently defining the project and the source in the json file !!!"
-	echo "bash appman_update_status.sh -t ${newtoken} -sfp \"../web/example.h\" -sjp \"../web/exampleh.json\" -dp \"mypath/\" -df \"main.h\" -s ${server} -port ${appmanager_port} ";
+	echo "bash appman_update_status.sh -t ${newtoken} -sjp \"../web/devicestatus.json\" -s ${server} -port ${appmanager_port} ";
 	read -p $'Press [Enter] key to run the script for \033[1;37mUPLOADING\033[1;34m a file with metadata'; echo -ne "${NO_COLOUR}";
-	bash appman_update_status.sh -t ${newtoken} -sfp "../web/example.h" -sjp "../web/exampleh.json" -dp "mypath/" -s ${server} -port ${appmanager_port} ;
-	exit ;
-# 14. ################## TEST OF DOWNLOADING A JSON FILE (TASK STATUS) WITH A VALID TOKEN, access must be accepted : 200 ###### 
+	bash appman_update_status.sh -t ${newtoken} -sjp "../web/devicestatus.json" -s ${server} -port ${appmanager_port} ;
+# 14. ################## TEST OF QUERY, access must be accepted : 200 ###### 
 	echo -e "\n${LIGHT_BLUE}";
-	echo "bash appman_get.sh -t ${newtoken} -project \"phantom_tools_on_HPC\" -s ${server} -port ${appmanager_port} ";
+	echo "bash appman_get.sh -t ${newtoken} -device \"HLRS%20Raspberry%20pi3\" -s ${server} -port ${appmanager_port} ";
 	read -p $'Press [Enter] key to run the script for \033[1;37mDOWNLOADING\033[1;34m a file from the REPOSITORY'; echo -ne "${NO_COLOUR}";
-	bash appman_get.sh -t ${newtoken} -project "phantom_tools_on_HPC" -s ${server} -port ${appmanager_port} ;
+	bash appman_get.sh -t ${newtoken} -device "HLRS%20Raspberry%20pi3" -s ${server} -port ${appmanager_port} ;
+
+
 
