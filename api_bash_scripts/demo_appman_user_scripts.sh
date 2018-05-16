@@ -66,5 +66,3 @@ source colors.sh;
 	read -p $'Press [Enter] key to run the script for \033[1;37mDOWNLOADING\033[1;34m a file from the REPOSITORY'; echo -ne "${NO_COLOUR}";
 	bash appman_get.sh -t ${newtoken} -device "HLRS%20Raspberry%20pi3" -s ${server} -port ${appmanager_port} ;
 
-
-
