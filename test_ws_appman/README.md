@@ -44,3 +44,8 @@ bash test_appman_project_update_db.sh
 ```bash
 bash test_appman_execs_update_db.sh
 ```
+
+
+Demonstration step-by-step video of suscribing with JAVA to notifications to the APP-Manager is available at [Demo WS][Demo WS].
+
+[Demo WS]: https://www.youtube.com/watch?v=NByRNFJG1tI
