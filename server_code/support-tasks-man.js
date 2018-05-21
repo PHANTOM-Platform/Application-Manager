@@ -103,27 +103,57 @@ find_project: function(es_server, my_index, project, pretty){
 		var client = new elasticsearch.Client({
 			host: es_server,
 			log: 'error'
-		});
-		client.search({
-			index: my_index,
-			type: my_type, 
-			body: {
-				"query":{"bool":{"must":[
-						{"match_phrase":{"project": project }}, {"term":{"project_length": project.length}}
-				]}}
-			}
-		}, function(error, response) {
-			if (error) { 
-				reject ("error: "+error);
-			}else{
-				item = JSON.parse(JSON.stringify(response.hits.hits[0]._source));
-				if((pretty=="true")||(pretty=="TRUE")){ 
-					resolve(" "+(JSON.stringify(item, null, 4)));
-				}else{ 
-					resolve(" "+(JSON.stringify(item)));
+		}); 
+		if(project==undefined){
+			resolve({});
+		}else if(project.length==0){  
+			client.search({
+				index: my_index,
+				type: my_type, 
+				size: 10000,
+				body:{"query":{"match_all": {} }}
+			}, function(error, response) { 
+				if (error){
+					reject("search error: "+error)
+				} else {
+					var result="";
+					var keys = Object.keys(response.hits.hits);
+					keys.forEach(function(key) { 
+						item = JSON.parse(JSON.stringify(response.hits.hits[key]._source));
+						if(result!=""){
+							result+=",";
+						}
+						if((pretty=="true")||(pretty=="TRUE")){ 
+							result+=" "+(JSON.stringify(item, null, 4));
+						}else{ 
+							result+=" "+(JSON.stringify(item));
+						}
+					});
+				};
+				resolve("{\"hits\" :["+result+"]}");  
+			});
+		}else{ 
+			client.search({
+				index: my_index,
+				type: my_type, 
+				body: {
+					"query":{"bool":{"must":[
+							{"match_phrase":{"project": project }}, {"term":{"project_length": project.length}}
+					]}}
 				}
-			}
-		});
+			}, function(error, response) {
+				if (error) { 
+					reject ("error: "+error);
+				}else{
+					item = JSON.parse(JSON.stringify(response.hits.hits[0]._source));
+					if((pretty=="true")||(pretty=="TRUE")){ 
+						resolve(" "+(JSON.stringify(item, null, 4)));
+					}else{ 
+						resolve(" "+(JSON.stringify(item)));
+					}
+				}
+			});
+		}
 	});
 },	
 //****************************************************
@@ -137,6 +167,21 @@ query_count_project: function(es_server, my_index, project){
 		});
 		if(project==undefined){
 			resolve(0);
+		}else if(project.length==0){ 
+			client.count({
+				index: my_index,
+				type: my_type, 
+				body:{"query":{"match_all": {} }}
+			}, function(error, response) {
+				if (error) { 
+					reject (error);
+				}
+				if (response.count !== undefined) {
+					resolve (response.count);//size
+				}else{
+					resolve (0);//size
+				} 
+			});
 		}else{
 			client.count({
 				index: my_index,

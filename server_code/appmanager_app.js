@@ -815,6 +815,71 @@ app.post('/register_new_project',middleware.ensureAuthenticated, function(req, r
 app.post('/update_project_tasks',middleware.ensureAuthenticated, function(req, res) {
 	register_task(req, res,false);
 });
+//********************************************************** 
+app.get('/get_project_list',  function(req, res) {
+	"use strict"; 
+	var currentdate = dateFormat(new Date(), "yyyy-mm-dd'T'HH:MM:ss.l");  
+	var message_bad_request = "UPLOAD Bad Request missing ";
+	var resultlog ;   
+	var pretty		= find_param(req.body.pretty, req.query.pretty);
+	var projectname	= find_param(req.body.project, req.query.project);
+	 
+	var result_count = TasksModule.query_count_project(es_servername + ":" + es_port,SERVERDB, "");
+	result_count.then((resultResolve) => {
+		if(resultResolve!=0){//new entry (2) we resister new entry  
+			var result_id = TasksModule.find_project(es_servername + ":" + es_port,SERVERDB, ""); 
+			result_id.then((result_json) => { 
+				resolve ("Empty list of Apps" );  
+				return; 
+			},(result_idReject)=> {
+				res.writeHead(400, {"Content-Type": contentType_text_plain});
+				res.end( "error requesting list of apps", 'utf-8');
+				return;
+			});  
+		}
+	},(resultReject)=> { 
+		res.writeHead(400, {"Content-Type": contentType_text_plain});
+		res.end(resultReject + "\n", 'utf-8'); //error counting projects in the DB
+		resultlog = LogsModule.register_log( es_servername + ":" + es_port,SERVERDB,400,req.connection.remoteAddress,"ERROR on requesting list of apps",currentdate,res.user); 
+		return;
+	});
+});
+
+//********************************************************** 
+app.get('/get_app_list', function(req, res) {
+	"use strict"; 
+	var currentdate = dateFormat(new Date(), "yyyy-mm-dd'T'HH:MM:ss.l");  
+	var message_bad_request = "UPLOAD Bad Request missing ";
+	var resultlog ;   
+	var pretty		= find_param(req.body.pretty, req.query.pretty);
+	var projectname	= find_param(req.body.project, req.query.project);
+	 
+	var result_count = TasksModule.query_count_project(es_servername + ":" + es_port,SERVERDB, "");
+	result_count.then((resultResolve) => {
+		if(resultResolve!=0){//new entry (2) we resister new entry  
+			var result_id = TasksModule.find_project(es_servername + ":" + es_port,SERVERDB, "",pretty); 
+			result_id.then((result_json) => { 
+				res.writeHead(200, {"Content-Type": contentType_text_plain});   
+				res.end( result_json); 
+				return; 
+			},(result_idReject)=> {
+				res.writeHead(400, {"Content-Type": contentType_text_plain});
+				res.end( "error requesting list of apps", 'utf-8');
+				return;
+			});  
+		}else{
+			res.writeHead(200, {"Content-Type": contentType_text_plain});	
+			res.end("Empty list of Apps" );  
+			return;
+		}
+	},(resultReject)=> { 
+		res.writeHead(400, {"Content-Type": contentType_text_plain});
+		res.end(resultReject + "\n", 'utf-8'); //error counting projects in the DB
+		resultlog = LogsModule.register_log( es_servername + ":" + es_port,SERVERDB,400,req.connection.remoteAddress,"ERROR on requesting list of apps",currentdate,res.user); 
+		return;
+	});
+});
+
 //**********************************************************
 app.get('/query_task',middleware.ensureAuthenticated, function(req, res) { 
 	var currentdate	= dateFormat(new Date(), "yyyy-mm-dd'T'HH:MM:ss.l"); 
