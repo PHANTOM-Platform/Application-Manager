@@ -340,16 +340,16 @@ function update_filename_path_on_json(JSONstring, filename, path){
 	var new_json = {  } 
 	var jsonobj = JSON.parse(JSONstring);
 	var keys = Object.keys(jsonobj); 
+	new_json['path']		=path;
+	new_json['path_length']	=path.length; //label can not contain points '.' !
+	new_json['filename']	=filename;
+	new_json['filename_length']=filename.length;	
 	for (var i = 0; i < keys.length; i++) {
 		var label=Object.getOwnPropertyNames(jsonobj)[i];
 		label=label.toLowerCase();
 		if((label != 'path') && (label != 'filename') && (label != 'path_length') && (label != 'filename_length'))
 		new_json[label]=jsonobj[keys[i]];	//add one property 
 	} 
-	new_json['path']		=path;
-	new_json['path_length']	=path.length; //label can not contain points '.' !
-	new_json['filename']	=filename;
-	new_json['filename_length']=filename.length;
 	new_json=(JSON.stringify(new_json));
 	return new_json;
 }
@@ -358,14 +358,14 @@ function update_device_length_on_json(JSONstring, device){
 	var new_json = {  } 
 	var jsonobj = JSON.parse(JSONstring);
 	var keys = Object.keys(jsonobj); 
+	new_json['device']		=device;
+	new_json['device_length']	=device.length; 	
 	for (var i = 0; i < keys.length; i++) {
 		var label=Object.getOwnPropertyNames(jsonobj)[i];
 		label=label.toLowerCase();
 		if((label != 'device') && (label != 'device_length'))
 		new_json[label]=jsonobj[keys[i]];	//add one property 
 	} 
-	new_json['device']		=device;
-	new_json['device_length']	=device.length; 
 	new_json=(JSON.stringify(new_json));
 	return new_json;
 }
@@ -374,14 +374,14 @@ function update_app_length_on_json(JSONstring, appname){
 	var new_json = {  } 
 	var jsonobj = JSON.parse(JSONstring);
 	var keys = Object.keys(jsonobj); 
+	new_json['app']		=appname;
+	new_json['app_length']	=appname.length; 	
 	for (var i = 0; i < keys.length; i++) {
 		var label=Object.getOwnPropertyNames(jsonobj)[i];
 		label=label.toLowerCase();
 		if((label != 'app') && (label != 'app_length'))
 		new_json[label]=jsonobj[keys[i]];	//add one property 
 	} 
-	new_json['app']		=appname;
-	new_json['app_length']	=appname.length; 
 	new_json=(JSON.stringify(new_json));
 	return new_json;
 }
@@ -430,6 +430,25 @@ function get_value_json(JSONstring,label){
 	}
 	return (myres);
 }
+
+
+function update_projectname_length_on_json(JSONstring, projectname){ 
+	var new_json = {  } 
+	var jsonobj = JSON.parse(JSONstring);
+	var keys = Object.keys(jsonobj); 
+	new_json['project']		=projectname;
+	new_json['project_length']	=projectname.length; 	
+	for (var i = 0; i < keys.length; i++) {
+		var label=Object.getOwnPropertyNames(jsonobj)[i];
+		label=label.toLowerCase();
+		if((label != 'project') && (label != 'project_length'))
+		new_json[label]=jsonobj[keys[i]];	//add one property 
+	} 
+	new_json=(JSON.stringify(new_json));
+	return new_json;
+}
+
+
 //**********************************************************
 function validate_parameter(parameter,label,currentdate,user,address){
 	var message_error = "DOWNLOAD Bad Request missing "+label;  
@@ -735,13 +754,14 @@ function register_task(req, res,new_task){
 	var projectname= get_value_json(jsontext,"project"); //(1) parsing the JSON
 	projectname=projectname.value;  
 	
+	jsontext =  update_projectname_length_on_json(jsontext, projectname);
 	
 // 	console.log("send_project_update_to_suscribers("+projectname+")");
 	send_project_update_to_suscribers(projectname,jsontext);	
 	var result_count = TasksModule.query_count_project(es_servername + ":" + es_port,SERVERDB, projectname);
 	result_count.then((resultResolve) => {
 		if(resultResolve==0){//new entry (2) we resister new entry 
-			var result = TasksModule.register_json(es_servername + ":" + es_port,SERVERDB, jsontext); 
+			var result = TasksModule.register_json(es_servername + ":" + es_port,SERVERDB, jsontext,""); 
 			result.then((resultResolve) => {
 				resultlog = LogsModule.register_log(es_servername + ":" + es_port,SERVERDB, 200,req.connection.remoteAddress,"Add task Succeed",currentdate,res.user);  
 				res.writeHead(resultResolve.code, {"Content-Type": contentType_text_plain});
@@ -827,7 +847,7 @@ app.get('/get_project_list',  function(req, res) {
 	var result_count = TasksModule.query_count_project(es_servername + ":" + es_port,SERVERDB, "");
 	result_count.then((resultResolve) => {
 		if(resultResolve!=0){//new entry (2) we resister new entry  
-			var result_id = TasksModule.find_project(es_servername + ":" + es_port,SERVERDB, ""); 
+			var result_id = TasksModule.find_project(es_servername + ":" + es_port,SERVERDB, "", pretty); 
 			result_id.then((result_json) => { 
 				resolve ("Empty list of Apps" );  
 				return; 
@@ -849,22 +869,23 @@ app.get('/get_project_list',  function(req, res) {
 app.get('/get_app_list', function(req, res) {
 	"use strict"; 
 	var currentdate = dateFormat(new Date(), "yyyy-mm-dd'T'HH:MM:ss.l");  
-	var message_bad_request = "UPLOAD Bad Request missing ";
-	var resultlog ;   
+	var message_bad_request = "UPLOAD Bad Request missing "; 
 	var pretty		= find_param(req.body.pretty, req.query.pretty);
 	var projectname	= find_param(req.body.project, req.query.project);
-	 
-	var result_count = TasksModule.query_count_project(es_servername + ":" + es_port,SERVERDB, "");
+
+	if (projectname==undefined) projectname="";
+		
+	var result_count = TasksModule.query_count_project(es_servername + ":" + es_port,SERVERDB, projectname);
 	result_count.then((resultResolve) => {
-		if(resultResolve!=0){//new entry (2) we resister new entry  
-			var result_id = TasksModule.find_project(es_servername + ":" + es_port,SERVERDB, "",pretty); 
+		if(resultResolve!=0){//new entry (2) we resister new entry
+			var result_id = TasksModule.find_project(es_servername + ":" + es_port,SERVERDB, projectname,pretty); 
 			result_id.then((result_json) => { 
 				res.writeHead(200, {"Content-Type": contentType_text_plain});   
-				res.end( result_json); 
+				res.end(result_json); 
 				return; 
 			},(result_idReject)=> {
 				res.writeHead(400, {"Content-Type": contentType_text_plain});
-				res.end( "error requesting list of apps", 'utf-8');
+				res.end("error requesting list of apps", 'utf-8');
 				return;
 			});  
 		}else{
@@ -875,7 +896,7 @@ app.get('/get_app_list', function(req, res) {
 	},(resultReject)=> { 
 		res.writeHead(400, {"Content-Type": contentType_text_plain});
 		res.end(resultReject + "\n", 'utf-8'); //error counting projects in the DB
-		resultlog = LogsModule.register_log( es_servername + ":" + es_port,SERVERDB,400,req.connection.remoteAddress,"ERROR on requesting list of apps",currentdate,res.user); 
+		var resultlog = LogsModule.register_log( es_servername + ":" + es_port,SERVERDB,400,req.connection.remoteAddress,"ERROR on requesting list of apps",currentdate,res.user); 
 		return;
 	});
 });
