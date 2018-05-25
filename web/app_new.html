@@ -3,11 +3,19 @@
 <head>
 	<meta charset="utf-8">
 	<title>PHANTOM APP-MANAGER</title>
-	<link rel="stylesheet" type="text/css" href="appmanager.css">  
+	<link rel="stylesheet" type="text/css" href="appmanager.css">
 	<script type="text/javascript" src="appmanager.js"></script> 
 </head>
 
-<body onload="start_page()"> 
+<body onload="start_page_new()">
+<!--<script type="text/javascript">
+	
+	(function() {
+
+				window.addEventListener("storage", message_receive);  
+			})();
+			
+</script>-->
 	<div id="menu_phantom">
 	<ul class="menuphantom">
 		<li class="menuphantom"><a href="app_list.html">List of registered APPs</a></li>
@@ -23,29 +31,28 @@
 			<p><a onClick="logout();return false;" href="PleaseEnableJavascript.html">LogOut</a></p></li>
 	</ul></div>
 
-<h1><b>LIST OF Registered APPs</b></h1>
+	
+	
+ <h1 id="title_login" style="overflow-wrap:break-word; max-width:80%; word-wrap:break-all; word-break: break-all; "><div style="max-width:200px; word-wrap:break-all;"><b>Register an APP</b></div></h1>
+	 
 
-<h2><b> Online formular: Retrieve List of APPs</b></h2>
-	<form ref='queryForm'
-	id='queryForm'
-	method='get'
-	name="myForm"
-	encType="multipart/form-data">
+<hr><br>
+<h2><b> Online formular: </b></h2>
+
+	<form ref='uploadForm'
+		id='uploadForm' 
+		name="myForm" >
+		&emsp; Json File (REQUIRED) <input type="file" name="UploadJSON" id="UploadJSON" /><br> 
 	<center>
-	APP name (optional): <input type="text" name="appname" id="appname" value="demo_hpc"> leave empty if not wish to filter by name<br> 
-	<input type="hidden" name="pretty" value="true">
-	<!-- upload button-->
-	<input type="submit" onclick="return list_results(1,document.getElementById('appname').value)" value="Show results in Table" />
-	<input type="submit" onclick="return list_results(2,document.getElementById('appname').value)" value="Show results as JSON" />
-	<input type="submit" onclick="return list_results(3,document.getElementById('appname').value)" value="Show raw reply from server" />
+	<input type="submit" onclick="return upload_with_token( document.getElementById('UploadJSON') )" value="Register APP" /> 
 </center> 
 </form>
 
-<!--<b>Tested command line example with curl:</b>
-<p style="color:DodgerBlue;">
-curl -XGET 'http://localhost:8000/query_metadata?Path=mypath%2F&filename=main.c'
-</p>-->
-
+	<hr><br><h2><b> CAUTION:<b></h2>
+	<ul style="list-style-type:disc"> 
+		<li> Field names in the json must be lower-case </li><br>
+	</ul>
+ 
 	<div id="debug_phantom" style="display:none">
 	<hr><p id="demoreplaceb"></p>
 	</div>

@@ -3,12 +3,13 @@
 <head>
 	<meta charset="utf-8">
 	<title>PHANTOM APP-MANAGER</title>
-	<link rel="stylesheet" type="text/css" href="appmanager.css">  
+	<link rel="stylesheet" type="text/css" href="appmanager.css"> 
 	<script type="text/javascript" src="appmanager.js"></script> 
 </head>
 
-<body onload="start_page()"> 
-	<div id="menu_phantom">
+<body onload="start_page_login()">
+
+	<div id="menu_phantom"  >
 	<ul class="menuphantom">
 		<li class="menuphantom"><a href="app_list.html">List of registered APPs</a></li>
 		<li class="menuphantom"><a href="app_new.html">Register new APP</a></li>
@@ -23,28 +24,21 @@
 			<p><a onClick="logout();return false;" href="PleaseEnableJavascript.html">LogOut</a></p></li>
 	</ul></div>
 
-<h1><b>LIST OF Registered APPs</b></h1>
-
-<h2><b> Online formular: Retrieve List of APPs</b></h2>
+	<H1 id="title_login" style="overflow-wrap:break-word; max-width:80%; word-wrap:break-all; word-break: break-all; "><b>LOGIN into APP-MANAGER</b></H1>
+ 
 	<form ref='queryForm'
-	id='queryForm'
-	method='get'
-	name="myForm"
-	encType="multipart/form-data">
-	<center>
-	APP name (optional): <input type="text" name="appname" id="appname" value="demo_hpc"> leave empty if not wish to filter by name<br> 
-	<input type="hidden" name="pretty" value="true">
-	<!-- upload button-->
-	<input type="submit" onclick="return list_results(1,document.getElementById('appname').value)" value="Show results in Table" />
-	<input type="submit" onclick="return list_results(2,document.getElementById('appname').value)" value="Show results as JSON" />
-	<input type="submit" onclick="return list_results(3,document.getElementById('appname').value)" value="Show raw reply from server" />
-</center> 
-</form>
-
-<!--<b>Tested command line example with curl:</b>
-<p style="color:DodgerBlue;">
-curl -XGET 'http://localhost:8000/query_metadata?Path=mypath%2F&filename=main.c'
-</p>-->
+		id='requestToken'
+		method='get'
+		name="myForm"
+		encType="multipart/form-data">
+		<center>
+			User: <input type="text" name="user" id="user" value="montana@abc.com"> <br> 
+			Password: <input type="password" name="password" id="password" value="new"> <br> 
+			<input type="hidden" name="pretty" value="true">
+			<!-- upload button-->
+			<input type="submit" onclick=" myresults(document.getElementById('user').value, document.getElementById('password').value); return false;" value="LOGIN" /> 
+		</center> 
+	</form>
 
 	<div id="debug_phantom" style="display:none">
 	<hr><p id="demoreplaceb"></p>
