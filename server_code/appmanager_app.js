@@ -462,7 +462,7 @@ function validate_parameter(parameter,label,currentdate,user,address){
 }
 
 //*********************************************************
-function retrieve_file(filePath,req){
+function retrieve_file(filePath,res){
 	var fs = require('fs');
 	var path = require('path');
 	var extname = path.extname(filePath);
@@ -541,30 +541,68 @@ app.get('/servername', function(req, res, next) {
 	res.end(SERVERNAME);
 });
 //**********************************************************
-app.get('/upload_file.html', function(req, res) {
-	var filePath = 'web/upload_file.html';
-	retrieve_file(filePath,req);
+app.get('/appmanager.html', function(req, res) {
+        var filePath = '../web/appmanager.html';
+        retrieve_file(filePath,res);
 });
 //**********************************************************
-app.get('/upload_file.html', function(req, res) { 
-	var filePath = 'web/upload_file.html';
-	retrieve_file(filePath,req);
+app.get('/appmanager.css', function(req, res) {
+        var filePath = '../web/appmanager.css';
+        retrieve_file(filePath,res);
 });
 //*******************************
-app.get('/download_file.html', function(req, res) { 
-	var filePath = 'web/download_file.html';
-	retrieve_file(filePath,req);
+app.get('/appmanager.js', function(req, res) {
+        var filePath = '../web/appmanager.js';
+        retrieve_file(filePath,res);
 });
 //*******************************
-app.get('/examplec.json', function(req, res) { 
-	var filePath = 'web/examplec.json';
-	retrieve_file(filePath,req);
+app.get('/app_new.html', function(req, res) {
+        var filePath = '../web/app_new.html';
+        retrieve_file(filePath,res);
 });
+
+//*******************************
+app.get('/phantom.gif', function(req, res) {
+        var filePath = '../web/phantom.gif';
+        retrieve_file(filePath,res);
+});
+//*******************************
+app.get('/app_update.html', function(req, res) {
+        var filePath = '../web/app_update.html';
+        retrieve_file(filePath,res);
+}); 
+//*******************************
+app.get('/app_list.html', function(req, res) {
+        var filePath = '../web/app_list.html';
+        retrieve_file(filePath,res);
+});
+//*******************************
+app.get('/app_update1.json', function(req, res) {
+        var filePath = '../web/app_update1.json';
+        retrieve_file(filePath,res);
+});
+//*******************************
+app.get('/app_update2.json', function(req, res) {
+        var filePath = '../web/app_update2.json';
+        retrieve_file(filePath,res);
+});
+//*******************************
+app.get('/app_update3.json', function(req, res) {
+        var filePath = '../web/app_update3.json';
+        retrieve_file(filePath,res);
+});
+
 //*******************************
 app.get('/query_metadata.html', function(req, res) { 
 	var filePath = 'web/query_metadata.html';
-	retrieve_file(filePath,req);
+	retrieve_file(filePath,res);
 });
+//***********************************
+app.get('/app_list.html', function(req, res) { 
+	var filePath = '../web/app_list.html';
+	retrieve_file(filePath,res);
+});
+//***********************************
 // Path only accesible when Authenticated
 app.get('/private',middleware.ensureAuthenticated, function(req, res) {
 	var message = "\n\nAccess to restricted content !!!.\n\n"
@@ -849,7 +887,8 @@ app.get('/get_project_list',  function(req, res) {
 		if(resultResolve!=0){//new entry (2) we resister new entry  
 			var result_id = TasksModule.find_project(es_servername + ":" + es_port,SERVERDB, "", pretty); 
 			result_id.then((result_json) => { 
-				resolve ("Empty list of Apps" );  
+				res.writeHead(410, {"Content-Type": contentType_text_plain});//not put 200 then webpage works
+				res.end( "error empty list of apps", 'utf-8'); 
 				return; 
 			},(result_idReject)=> {
 				res.writeHead(400, {"Content-Type": contentType_text_plain});
@@ -871,10 +910,10 @@ app.get('/get_app_list', function(req, res) {
 	var currentdate = dateFormat(new Date(), "yyyy-mm-dd'T'HH:MM:ss.l");  
 	var message_bad_request = "UPLOAD Bad Request missing "; 
 	var pretty		= find_param(req.body.pretty, req.query.pretty);
-	var projectname	= find_param(req.body.project, req.query.project);
+	var projectname	= CommonModule.remove_quotation_marks(find_param(req.body.project, req.query.project));
 
 	if (projectname==undefined) projectname="";
-		
+
 	var result_count = TasksModule.query_count_project(es_servername + ":" + es_port,SERVERDB, projectname);
 	result_count.then((resultResolve) => {
 		if(resultResolve!=0){//new entry (2) we resister new entry
@@ -889,7 +928,7 @@ app.get('/get_app_list', function(req, res) {
 				return;
 			});  
 		}else{
-			res.writeHead(200, {"Content-Type": contentType_text_plain});	
+			res.writeHead(430, {"Content-Type": contentType_text_plain});	//not put 200 then webpage works
 			res.end("Empty list of Apps" );  
 			return;
 		}
