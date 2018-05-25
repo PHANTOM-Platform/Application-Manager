@@ -14,12 +14,10 @@ function checktoken() {
 	}else{
 		if(menu_phantom) document.getElementById("menu_phantom").style.display = "block";
 		if(requestToken) document.getElementById("requestToken").style.display = "none"; 
-// 		if(title_login) document.getElementById("title_login").style.display = "none"; 		 
-	}
-	if(sessionStorage.token == undefined)
-	if(title_login) document.getElementById("title_login").innerHTML = " "+ sessionStorage.token;  
-	if(sessionStorage.token != undefined)
-	if(title_login) document.getElementById("title_login").innerHTML = " "+JSON.stringify(sessionStorage);  
+		if(title_login) document.getElementById("title_login").style.display = "none"; 		 
+	} 
+// 	if(sessionStorage.token != undefined)
+// 	if(title_login) document.getElementById("title_login").innerHTML = " "+JSON.stringify(sessionStorage);  
 	return false;
 }
 
@@ -32,8 +30,7 @@ function share_session_storage_new(){
 	// Ask other tabs for session storage (this is ONLY to trigger event)
 	message_broadcast( ) ; 
 	window.addEventListener('storage', function(event) {  
-		if (event.key == 'sessionStorage'){ // && isEmpty(memoryStorage)) {
-			alert("received getSessionStorage !!" + JSON.parse(event.newValue));
+		if (event.key == 'sessionStorage'){ // && isEmpty(memoryStorage)) { 
 			sessionStorage.setItem('token', JSON.parse(event.newValue));
 			checktoken(); 
 		}
@@ -53,16 +50,12 @@ function request_share_session_storage(){
 
 
 function share_session_storage_login(){ 
-	// Ask other tabs for session storage (this is ONLY to trigger event)
-// 	message_broadcast();
-	
+	// Ask other tabs for session storage (this is ONLY to trigger event)  
 	window.addEventListener('storage', function(event) {  
 		if (event.key == 'getSessionStorage') { 
 			// Some tab asked for the memoryStorage -> send it  
-// 			message_broadcast();
 			localStorage.clear();
-			localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage.token));			
-// 			 
+			localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage.token)); 
 		}
 	});  
 	window.onbeforeunload = function() {
@@ -71,122 +64,21 @@ function share_session_storage_login(){
 	checktoken(); 
 	return false;
 } 
-
-	// transfers sessionStorage from one tab to another
-// 	var sessionStorage_transfer = function(event) {
-// 		if(!event) { event = window.event; } // ie suq
-// 		if(!event.newValue) return;          // do nothing if no value to work with
-// 		if (event.key == 'getSessionStorage') {
-// 			// another tab asked for the sessionStorage -> send it
-// 			localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
-// 			// the other tab should now have it, so we're done with it.
-// 			localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
-// 		} else if (event.key == 'sessionStorage' && !sessionStorage.length) {
-// 			// another tab sent data <- get it
-// 			var data = JSON.parse(event.newValue);
-// 			for (var key in data) {
-// 				sessionStorage.setItem(key, data[key]);
-// 			}
-// 		}
-// 	};
-// 
-// 	// listen for changes to localStorage
-// 	if(window.addEventListener) {
-// 		window.addEventListener("storage", sessionStorage_transfer, false);
-// 	} else {
-// 		window.attachEvent("onstorage", sessionStorage_transfer);
-// 	};
-// 
-
-// 		window.addEventListener('storage', function(event) { 
-// 			//console.log('storage event', event); 
-// 			if (event.key == 'getSessionStorage') {
-// 				// Some tab asked for the sessionStorage -> send it 
-// 				localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
-// 				localStorage.removeItem('sessionStorage'); 
-// 			} else if (event.key == 'sessionStorage' && !sessionStorage.length) {
-// 				// sessionStorage is empty -> fill it 
-// 				var data = JSON.parse(event.newValue),//value;
-// 				for (key in data) {
-// 					sessionStorage.setItem(key, data[key]);
-// 				}
-// 				checktoken(); 
-// 			}
-// 		}); 
-
-// function message_receive(ev) {
-// 	alert("received message !!" + JSON.stringify(event));
-//     if (ev.key == 'message') {
-//         var message=JSON.parse(ev.newValue);
-//     }
-// }	
-
-
-
-// function checkLoaded() {
-//     if (document.readyState !== 'complete' ) {
-//        setTimeout(checkLoaded, 100); /* this checks the flag every 100 milliseconds*/
-//     } else {
-// 		share_session_storage();	 
-// 		checktoken();
-//     }
-// } 
-
-
-// 	window.addEventListener("storage", message_receive);
-// // localStorage detection
-// function supportsLocalStorage() {
-//   return typeof(Storage)!== 'undefined';
-// }
-//  
  
-// 	HTMLDocument.prototype.ready = function () {
-// 		return new Promise(function(resolve, reject) {
-// 			if (document.readyState === 'complete') {
-// 				resolve(document);
-// 			} else {
-// 				document.addEventListener('DOMContentLoaded', function() {
-// 					resolve(document);
-// 				});
-// 			}
-// 		});
-// 	}
-// 	checkLoaded();
-// 	document.ready().then(
-// 		document.removeEventListener('DOMContentLoaded');
-// 		share_session_storage();	 
-// 		checktoken();
-// 	);
-// 	document.addEventListener("DOMContentLoaded", function(event){
-  // your code here
-// });
-// 	document.onreadystatechange = function () {
-// 		window.addEventListener("message", message_receive);  
-// 		if(document.readyState === "complete"){
-// 			share_session_storage();
-// 			checktoken();
-// 		}
-// 	}  
-
-	
 function savetoken(mytoken) {
 	if(typeof(Storage) !== "undefined") {
 		if (sessionStorage.token) { //update with new token 
-			sessionStorage.setItem('token', mytoken); 
+			sessionStorage.setItem('token', mytoken);
 		} else { //not defined token before
-			sessionStorage.setItem('token', mytoken); 
+			sessionStorage.setItem('token', mytoken); 
 		}
-		
-request_share_session_storage(); 
-// 		document.getElementById("demoreplaceb").innerHTML = "the token is: <br>" + sessionStorage.token; //this was for debugging purposes
+		request_share_session_storage();  
 		document.getElementById("debug_phantom").style.display = "none"; 
 	} else {
 		document.getElementById("demoreplaceb").innerHTML = "Sorry, your browser does not support web storage...";
 		document.getElementById("debug_phantom").style.display = "block"; 
 	}
-}
-
-
+} 
 
 function start_page_login() {  
 	share_session_storage_login();
@@ -201,10 +93,8 @@ function start_page_new() {
 } 
 
 function logout() {  
-	sessionStorage.setItem('token', ''); 
-	request_share_session_storage();
-// 	sessionStorage.clear();
-// 	localStorage.clear();  
+	sessionStorage.setItem('token', ''); 
+	request_share_session_storage(); 
 	checktoken();
 	return false;
 }
