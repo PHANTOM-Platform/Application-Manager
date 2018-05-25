@@ -1,4 +1,7 @@
 
+var appserver = "localhost";
+var appport = 8500;
+
 function checktoken() {
 	var menu_phantom = document.getElementById("menu_phantom");
 	var requestToken = document.getElementById("requestToken");
@@ -108,7 +111,7 @@ function getType(p) {
 } 
 
 function myresults(user,password){   
-	var url="http://localhost:8500/login?email="+user+"\&pw="+password+""; //?pretty='true'"; 
+	var url="http://"+appserver+":"+appport+"/login?email="+user+"\&pw="+password+""; //?pretty='true'"; 
 	var xhr = new XMLHttpRequest();  
 	xhr.open("GET", url, true);
 	xhr.onreadystatechange = function() { 
@@ -212,7 +215,7 @@ function upload_with_token( UploadJSON ) {
 		return false;
 	} 
 	if((sessionStorage.token !== undefined) && (sessionStorage.token.length>0)) {
-		var url = "http://localhost:8500/register_new_project"
+		var url = "http://"+appserver+":"+appport+"/register_new_project"
 		var xhr = new XMLHttpRequest();
 		var formData = new FormData();
 		var resultElement = document.getElementById("demoreplaceb");
@@ -241,7 +244,7 @@ function update_with_token( UploadJSON ) {
 		return false;
 	} 
 	if((sessionStorage.token !== undefined) && (sessionStorage.token.length>0)) {
-		var url = "http://localhost:8500/update_project_tasks"
+		var url = "http://"+appserver+":"+appport+"/update_project_tasks"
 		var xhr = new XMLHttpRequest();
 		var formData = new FormData();
 		var resultElement = document.getElementById("demoreplaceb");
@@ -264,7 +267,7 @@ function update_with_token( UploadJSON ) {
 } 
 
 function list_results(mytype,appname){
-	var url="http://localhost:8500/get_app_list?project=\""+appname+"\""; //?pretty='true'"; 
+	var url="http://"+appserver+":"+appport+"/get_app_list?project=\""+appname+"\""; //?pretty='true'"; 
 	var xhr = new XMLHttpRequest(); 
 	xhr.open("GET", url, true);
 	xhr.onreadystatechange = function() {
