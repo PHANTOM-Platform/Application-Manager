@@ -2,6 +2,12 @@
 var appserver = "localhost";
 var appport = 8500;
 
+var deviceserver = appserver;
+var deviceport = appport;
+
+var execserver = appserver;
+var execport = appport;
+
 function checktoken() {
 	var menu_phantom = document.getElementById("menu_phantom");
 	var requestToken = document.getElementById("requestToken");
@@ -161,14 +167,15 @@ function jsontotable(myjson){
 		count =1;	 
 		keys.forEach(function(key) {
 			if ( getType(val[key]) == "string" || getType(val[key]) == "other" ){
-			if( key != "project_length" ){
-				if(count == 1) { 
-					html += "<tr><th><strong>" + key + "</strong>: " + val[key] + "</th></tr>";
-				} else{
-					html += "<tr><td><strong>" + key + "</strong>: " + val[key] + "</td></tr>";	
-				}
-				count = count +1 ;
-			}}else if ( getType(val[key]) == "object" ) {
+				if( key != "project_length" && key != "device_length" && key != "app_length" ){
+					if(count == 1) { 
+						html += "<tr  align=\"left\"><th><strong>" + key + "</strong>: " + val[key] + "</th></tr>";
+					} else{
+						html += "<tr><td><strong> &emsp; " + key + "</strong>: " + val[key] + "</td></tr>";	
+					}
+					count = count +1 ;
+				} 
+			}else if ( getType(val[key]) == "object" ) {
 				newjson = JSON.stringify(val[key]);
 				html += "<tr><td><strong> &emsp; " + key + "</strong>: </td>" ;		
 				html += jsontotableb( [ val[key] ] ) +"</tr>";
@@ -186,15 +193,16 @@ function jsontohtml(myjson){
 		if ( newquery == 0 ) { html += ",</div><br>" }; 
 		newquery = 0 ;	
 		var keys = Object.keys(val);
-		html += "<div class = 'cat'>{"; 
+		html += "<div class = 'cat'>{";
 		count =1;
 		keys.forEach(function(key) {
 			if ( getType(val[key]) == "string" || getType(val[key]) == "other" ){
-			if( key != "project_length" ){
-				if (count != 1) html += ',<br>&emsp;';
-				html += "<strong>\"" + key + "\"</strong>: \"" + val[key] +"\"";
-				count = count +1 ;
-			}}else if ( getType(val[key]) == "object" ) {
+				if( key != "project_length" && key != "device_length" && key != "app_length"){
+					if (count != 1) html += ',<br>&emsp;';
+					html += "<strong>\"" + key + "\"</strong>: \"" + val[key] +"\"";
+					count = count +1 ;
+				} 
+			}else if ( getType(val[key]) == "object" ) {
 				if (count != 1) html += ',<br>&emsp;';
 				newjson = JSON.stringify(val[key]);
 				html += "<strong>\"" + key + "\"</strong>: \"" + JSON.stringify(val[key]) +"\"" ;
@@ -207,44 +215,65 @@ function jsontohtml(myjson){
 	return html;
 } 
 
-function upload_with_token( UploadJSON ) {
-	share_session_storage();
+function upload_with_token( UploadJSON, url ) {
+// 	share_session_storage();
 	if(!sessionStorage.token) {
 		document.getElementById("demoreplaceb").innerHTML = "Sorry, try login again, missing token...";
-		document.getElementById("debug_phantom").style.display = "block"; 
+		document.getElementById("demoreplaceb").style.display = "block"; 
 		return false;
 	} 
-	if((sessionStorage.token !== undefined) && (sessionStorage.token.length>0)) {
-		var url = "http://"+appserver+":"+appport+"/register_new_project"
+	if((sessionStorage.token !== undefined) && (sessionStorage.token.length>0)) { 
 		var xhr = new XMLHttpRequest();
 		var formData = new FormData();
 		var resultElement = document.getElementById("demoreplaceb");
 		xhr.open('POST', url, true);
 		xhr.setRequestHeader("Authorization", "JWT " + sessionStorage.token);
 		xhr.addEventListener('load', function() {
-			var responseObject = (xhr.responseText);
-			console.log(responseObject);
+			var responseObject = (xhr.responseText); 
 			resultElement.innerHTML = xhr.responseText;
-			document.getElementById("debug_phantom").style.display = "block"; 
+			document.getElementById("demoreplaceb").innerHTML = responseObject;
+			document.getElementById("demoreplaceb").style.display = "block"; 
 		}); 
 		formData.append("UploadJSON", UploadJSON.files[0]); 
 //formData.append("UploadFile", UploadFile.data); 
 		xhr.send(formData);
 	} else {
 		document.getElementById("demoreplaceb").innerHTML = "Sorry, try login again, missing token...";
-		document.getElementById("debug_phantom").style.display = "block"; 
+		document.getElementById("demoreplaceb").style.display = "block"; 
 	}
 	return false;
 } 
 
-function update_with_token( UploadJSON ) {
+function upload_app_with_token( UploadJSON ) { 
+	var url = "http://"+appserver+":"+appport+"/register_new_project";
+	upload_with_token( UploadJSON, url );	
+	return false;
+} 
+
+function upload_device_with_token( UploadJSON ) {
+	var url = "http://"+deviceserver+":"+deviceport+"/register_new_device"; 
+	 upload_with_token( UploadJSON ,url);	
+	return false;
+}
+
+function upload_exec_with_token( UploadJSON ) {
+	var url = "http://"+execserver+":"+execport+"/register_new_exec";
+	 upload_with_token( UploadJSON ,url);	
+	return false;
+}
+
+
+
+
+
+
+function update_with_token( UploadJSON ,url) {
 	if(!sessionStorage.token) {
 		document.getElementById("demoreplaceb").innerHTML = "Sorry, try login again, missing token...";
 		document.getElementById("debug_phantom").style.display = "block"; 
 		return false;
 	} 
-	if((sessionStorage.token !== undefined) && (sessionStorage.token.length>0)) {
-		var url = "http://"+appserver+":"+appport+"/update_project_tasks"
+	if((sessionStorage.token !== undefined) && (sessionStorage.token.length>0)) { 
 		var xhr = new XMLHttpRequest();
 		var formData = new FormData();
 		var resultElement = document.getElementById("demoreplaceb");
@@ -254,6 +283,8 @@ function update_with_token( UploadJSON ) {
 			var responseObject = (xhr.responseText);
 			console.log(responseObject);
 			resultElement.innerHTML = xhr.responseText;
+			document.getElementById("demoreplaceb").innerHTML = "Sorry, try login again, missing token...";
+			
 			document.getElementById("debug_phantom").style.display = "block"; 
 		}); 
 		formData.append("UploadJSON", UploadJSON.files[0]); 
@@ -266,8 +297,33 @@ function update_with_token( UploadJSON ) {
 	return false;
 } 
 
-function list_results(mytype,appname){
-	var url="http://"+appserver+":"+appport+"/get_app_list?project=\""+appname+"\""; //?pretty='true'"; 
+
+
+function update_app_with_token( UploadJSON ) {
+	var url = "http://"+appserver+":"+appport+"/update_project_tasks";
+	 update_with_token( UploadJSON ,url);	
+	return false;
+} 
+
+function update_device_with_token( UploadJSON ) {
+	var url = "http://"+deviceserver+":"+deviceport+"/update_device";
+// 	var url = "http://"+deviceserver+":"+deviceport+"/update_device_status";
+	 update_with_token( UploadJSON ,url);	
+	return false;
+}
+
+function update_exec_with_token( UploadJSON ) {
+	var url = "http://"+execserver+":"+execport+"/update_exec";
+	 update_with_token( UploadJSON ,url);	
+	return false;
+}
+
+
+
+
+
+
+function list_results(mytype,appname,url){ 
 	var xhr = new XMLHttpRequest(); 
 	xhr.open("GET", url, true);
 	xhr.onreadystatechange = function() {
@@ -277,7 +333,7 @@ function list_results(mytype,appname){
 			// document.getElementById('demoreplacea').innerHTML = serverResponse; //this will show the reponse of the server as txt; 
 			var myjson = JSON.parse(serverResponse);
 			if(myjson.hits!=undefined) {
-			myjson = myjson.hits;
+				myjson = myjson.hits;
 			}else{
 				myjson = [ myjson ];
 			}
@@ -293,8 +349,32 @@ function list_results(mytype,appname){
 			//document.getElementById('demoreplaceb').innerHTML = JSON.stringify(myjson) + "<br>" + html ;// myjson[0].project;
 			document.getElementById('demoreplaceb').innerHTML = html;
 			document.getElementById("debug_phantom").style.display = "block"; 
+		}else{
+			var serverResponse = xhr.responseText;
+			document.getElementById('demoreplaceb').innerHTML = serverResponse;
+			document.getElementById("debug_phantom").style.display = "block"; 			
 		}
 	};
 	xhr.send(null);
 	return false;
 }
+
+function list_apps(mytype,appname){
+	var url="http://"+appserver+":"+appport+"/get_app_list?project=\""+appname+"\""; //?pretty='true'"; 
+	list_results(mytype,appname,url); 
+	return false;
+}
+
+function list_execs(mytype,execname){
+	var url="http://"+execserver+":"+execport+"/get_exec_list?app=\""+execname+"\""; //?pretty='true'"; 
+	list_results(mytype,appname,url); 
+	return false;
+}
+
+function list_devices(mytype,devicename){
+	var url="http://"+deviceserver+":"+deviceport+"/get_device_list?device=\""+devicename+"\""; //?pretty='true'"; 
+	list_results(mytype,devicename,url); 
+	return false;
+}
+
+ 

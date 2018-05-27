@@ -7,15 +7,14 @@
 	<script type="text/javascript" src="appmanager.js"></script> 
 </head>
 
-<body onload="start_page_new()">
+<body onload="start_page_new()"> 
 	<div id="menu_phantom">
 	<ul class="menuphantom">
-		<li class="menuphantom"><a href="app_list.html">List of registered APPs</a></li>
-		<li class="menuphantom"><a href="app_new.html">Register new APP</a></li>
-		<li class="menuphantom"><a href="app_update.html">Update an APP</a></li>
-		<li class="menuphantom"><a href="app_update1.json">Download JSON example 1</a></li>  
-		<li class="menuphantom"><a href="app_update2.json">Download JSON example 2</a></li>  
-		<li class="menuphantom"><a href="app_update3.json">Download JSON example 3</a></li> 
+		<li class="menuphantom"><a href="device_list.html">List of registered DEVICEs</a></li>
+		<li class="menuphantom"><a href="device_new.html">Register new DEVICE</a></li>
+		<li class="menuphantom"><a href="device_update.html">Update an DEVICE</a></li>
+		<li class="menuphantom"><a href="device_update1.json">Download JSON example 1</a></li>  
+		<li class="menuphantom"><a href="device_update2.json">Download JSON example 2</a></li>  
 <!-- 		<li class="menuphantom"><a class="active" href="download_file.html">Download File</a></li> -->
 <!-- 		<li class="menuphantom"><a href="query_metadata.html">Query metadata</a></li> -->  
 		<li class="phantomlogo" style="float:right" > 
@@ -23,9 +22,9 @@
 		</li>
 		<li class="menuphantomR">
 			<p><a onClick="logout();return false;" href="PleaseEnableJavascript.html">LogOut</a></p></li>
-	</ul></div>
+	</ul></div> 
 
-<h1><b>Update an APP</b></h1> 
+<h1 id="title_login" style="overflow-wrap:break-word; max-width:80%; word-wrap:break-all; word-break: break-all; "> <b>Register an APP</b> </h1>
 
 <hr><br>
 <h2><b> Online formular: </b></h2>
@@ -35,13 +34,12 @@
 		name="myForm" >
 		&emsp; Json File (REQUIRED) <input type="file" name="UploadJSON" id="UploadJSON" /><br> 
 	<center>
-	<input type="submit" onclick="return update_app_with_token( document.getElementById('UploadJSON') )" value="Register APP" /> 
+	<input type="submit" onclick="return upload_device_with_token( document.getElementById('UploadJSON') )" value="Register APP" /> 
 </center> 
 </form>
 
 	<hr><br><h2><b> CAUTION:<b></h2>
-	<ul style="list-style-type:disc">
-		<li> An update merges the upload json with the already registered fields</li><br>
+	<ul style="list-style-type:disc"> 
 		<li> Field names in the json must be lower-case </li><br>
 	</ul>
  

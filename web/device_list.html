@@ -2,7 +2,7 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<title>PHANTOM APP-MANAGER</title>
+	<title>PHANTOM DEVICE-MANAGER</title>
 	<link rel="stylesheet" type="text/css" href="appmanager.css">  
 	<script type="text/javascript" src="appmanager.js"></script> 
 </head>
@@ -10,12 +10,11 @@
 <body onload="start_page_new()"> 
 	<div id="menu_phantom">
 	<ul class="menuphantom">
-		<li class="menuphantom"><a href="app_list.html">List of registered APPs</a></li>
-		<li class="menuphantom"><a href="app_new.html">Register new APP</a></li>
-		<li class="menuphantom"><a href="app_update.html">Update an APP</a></li>
-		<li class="menuphantom"><a href="app_update1.json">Download JSON example 1</a></li>  
-		<li class="menuphantom"><a href="app_update2.json">Download JSON example 2</a></li>  
-		<li class="menuphantom"><a href="app_update3.json">Download JSON example 3</a></li>  
+		<li class="menuphantom"><a href="device_list.html">List of registered DEVICEs</a></li>
+		<li class="menuphantom"><a href="device_new.html">Register new DEVICE</a></li>
+		<li class="menuphantom"><a href="device_update.html">Update an DEVICE</a></li>
+		<li class="menuphantom"><a href="device_update1.json">Download JSON example 1</a></li>  
+		<li class="menuphantom"><a href="device_update2.json">Download JSON example 2</a></li>   
 <!-- 		<li class="menuphantom"><a class="active" href="download_file.html">Download File</a></li> -->
 <!-- 		<li class="menuphantom"><a href="query_metadata.html">Query metadata</a></li> -->  
 		<li class="phantomlogo" style="float:right" > 
@@ -25,21 +24,21 @@
 			<p><a onClick="logout();return false;" href="PleaseEnableJavascript.html">LogOut</a></p></li>
 	</ul></div>
 
-<h1><b>LIST OF Registered APPs</b></h1>
+<h1><b>LIST OF Registered DEVICEs</b></h1>
 
-<h2><b> Online formular: Retrieve List of APPs</b></h2>
+<h2><b> Online formular: Retrieve List of DEVICEs</b></h2>
 	<form ref='queryForm'
 	id='queryForm'
 	method='get'
 	name="myForm"
 	encType="multipart/form-data">
 	<center>
-	APP name (optional): <input type="text" name="appname" id="appname" value="demo_hpc"> leave empty if not wish to filter by name<br> 
+	DEVICE name (optional): <input type="text" name="appname" id="appname" value="HLRS Raspberry pi3"> leave empty if not wish to filter by name<br> 
 	<input type="hidden" name="pretty" value="true">
 	<!-- upload button-->
-	<input type="submit" onclick="return list_apps(1,document.getElementById('appname').value)" value="Show results in Table" />
-	<input type="submit" onclick="return list_apps(2,document.getElementById('appname').value)" value="Show results as JSON" />
-	<input type="submit" onclick="return list_apps(3,document.getElementById('appname').value)" value="Show raw reply from server" />
+	<input type="submit" onclick="return list_devices(1,document.getElementById('appname').value)" value="Show results in Table" />
+	<input type="submit" onclick="return list_devices(2,document.getElementById('appname').value)" value="Show results as JSON" />
+	<input type="submit" onclick="return list_devices(3,document.getElementById('appname').value)" value="Show raw reply from server" />
 </center> 
 </form>
 

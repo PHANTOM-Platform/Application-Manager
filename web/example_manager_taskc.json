@@ -1,0 +1,8 @@
+{
+	"project": "demo_hpc",
+	"project_length":8,
+	"MBT_validation": {"completed": "true", "my_user_label":"it is optional"},
+	"PT":  {"completed": "true", "other_user_label":"mondays"},
+	"MOM": {"completed": "false" },
+	"MBT_test": {"completed": "false" }
+}
