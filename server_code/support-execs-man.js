@@ -73,6 +73,69 @@ register_json: function(es_server, my_index, body, remoteAddress, my_type) {
 		});
 	});
 }, //end register_json
+//****************************************************
+//This function is used to confirm that a app exists or not in the DataBase.
+//We first counted if existence is >0
+find_exec: function(es_server, my_index, app, pretty){ 
+	const my_type = 'executions_status' ;
+	return new Promise( (resolve,reject) => {
+		var elasticsearch = require('elasticsearch');
+		var client = new elasticsearch.Client({
+			host: es_server,
+			log: 'error'
+		}); 
+		if(app==undefined){
+			resolve({});
+		}else if(app.length==0){  
+			client.search({
+				index: my_index,
+				type: my_type, 
+				size: 10000,
+				body:{"query":{"match_all": {} }}
+			}, function(error, response) { 
+				if (error){
+					reject("search error: "+error)
+				} else {
+					var result="";
+					var keys = Object.keys(response.hits.hits);
+					keys.forEach(function(key) { 
+						item = JSON.parse(JSON.stringify(response.hits.hits[key]._source));
+						if(result!=""){
+							result+=",";
+						}
+						if((pretty=="true")||(pretty=="TRUE")){ 
+							result+=" "+(JSON.stringify(item, null, 4));
+						}else{ 
+							result+=" "+(JSON.stringify(item));
+						}
+					});
+				};
+				resolve("{\"hits\" :["+result+"]}");  
+			});
+		}else{ 
+			client.search({
+				index: my_index,
+				type: my_type, 
+				body: {
+					"query":{"bool":{"must":[
+							{"match_phrase":{"app": app }}, {"term":{"app_length": app.length}}
+					]}}
+				}
+			}, function(error, response) {
+				if (error) { 
+					reject ("error: "+error);
+				}else{
+					item = JSON.parse(JSON.stringify(response.hits.hits[0]._source));
+					if((pretty=="true")||(pretty=="TRUE")){ 
+						resolve(" "+(JSON.stringify(item, null, 4)));
+					}else{ 
+						resolve(" "+(JSON.stringify(item)));
+					}
+				}
+			});
+		}
+	});
+},
 //***************************************************
 register_exec_json: function(es_server, my_index, body, remoteAddress) {
 	const my_type = 'executions_status' ; 
@@ -112,40 +175,7 @@ find_exec_id: function(es_server, my_index, app){
 			}
 		});
 	});
-},//find_exec_id
-//****************************************************  
-//This function is used to confirm that a execution exists or not in the DataBase.
-//We first counted if existence is >0
-find_exec: function(es_server, my_index, app, pretty){ 
-	const my_type = 'executions_status' ;
-	return new Promise( (resolve,reject) => {
-		var elasticsearch = require('elasticsearch');
-		var client = new elasticsearch.Client({
-			host: es_server,
-			log: 'error'
-		});
-		client.search({
-			index: my_index,
-			type: my_type, 
-			body: {
-				"query":{"bool":{"must":[
-					{"match_phrase":{"app": app }}, {"term":{"app_length": app.length}}
-				]}}
-			}
-		}, function(error, response) {
-			if (error) { 
-				reject ("error: "+error);
-			}else{
-				item = JSON.parse(JSON.stringify(response.hits.hits[0]._source));
-				if((pretty=="true")||(pretty=="TRUE")){ 
-					resolve(" "+(JSON.stringify(item, null, 4)));
-				}else{ 
-					resolve(" "+(JSON.stringify(item)));
-				}
-			}
-		});
-	});
-},
+},//find_exec_id 
 //****************************************************
 //This function is used to confirm that an user exists or not in the DataBase.
 query_count_exec_id: function(es_server, my_index, exec_id){ 
@@ -192,6 +222,21 @@ query_count_exec: function(es_server, my_index, app){
 		});
 		if(app==undefined){
 			resolve(0);
+		}else if(app.length==0){ 
+			client.count({
+				index: my_index,
+				type: my_type, 
+				body:{"query":{"match_all": {} }}
+			}, function(error, response) {
+				if (error) { 
+					reject (error);
+				}
+				if (response.count !== undefined) {
+					resolve (response.count);//size
+				}else{
+					resolve (0);//size
+				} 
+			});
 		}else{
 			client.count({
 				index: my_index,

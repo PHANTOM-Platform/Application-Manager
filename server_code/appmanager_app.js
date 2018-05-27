@@ -59,6 +59,9 @@ const devicemapping = {
 				"type": "string",
 				"index": "analyzed"
 			},
+			"device_length":{
+				"type": "int"				
+			},
 			"device_length": { // this field is registered for quering purposes
 				"type": "short"
 			},
@@ -102,6 +105,9 @@ const statusmapping = { //the idea is keep a single entry, the evolution of load
 				"type": "string", //this is the id from the table devices
 				"index": "not_analyzed"				
 			},
+			"device_id_length":{
+				"type": "int"				
+			},
 			"cpu_load": { // the used percentage of the cpu 
 				"type": "float"
 			},
@@ -133,6 +139,9 @@ const execsmapping = {
 			"app": { // the used percentage of the cpu 
 				"type": "string", //Example: NA, Nvidia GTX960
 				"index": "analyzed"
+			},
+			"app_length":{
+				"type": "int"				
 			},
 			"device": { // the used percentage of the cpu 
 				"type": "string", //Example: NA, Nvidia GTX960
@@ -555,15 +564,16 @@ app.get('/appmanager.js', function(req, res) {
         var filePath = '../web/appmanager.js';
         retrieve_file(filePath,res);
 });
-//*******************************
-app.get('/app_new.html', function(req, res) {
-        var filePath = '../web/app_new.html';
-        retrieve_file(filePath,res);
-});
+
 
 //*******************************
 app.get('/phantom.gif', function(req, res) {
         var filePath = '../web/phantom.gif';
+        retrieve_file(filePath,res);
+});
+//*******************************
+app.get('/app_new.html', function(req, res) {
+        var filePath = '../web/app_new.html';
         retrieve_file(filePath,res);
 });
 //*******************************
@@ -592,17 +602,95 @@ app.get('/app_update3.json', function(req, res) {
         retrieve_file(filePath,res);
 });
 
+
+
+
+//*******************************
+app.get('/devicemanager.html', function(req, res) {
+        var filePath = '../web/devicemanager.html';
+        retrieve_file(filePath,res);
+}); 
+//*******************************
+app.get('/device_new.html', function(req, res) {
+        var filePath = '../web/device_new.html';
+        retrieve_file(filePath,res);
+});
+//*******************************
+app.get('/device_update.html', function(req, res) {
+        var filePath = '../web/device_update.html';
+        retrieve_file(filePath,res);
+}); 
+//*******************************
+app.get('/device_list.html', function(req, res) {
+        var filePath = '../web/device_list.html';
+        retrieve_file(filePath,res);
+});
+//*******************************
+app.get('/device_update1.json', function(req, res) {
+        var filePath = '../web/device_update1.json';
+        retrieve_file(filePath,res);
+});
+//*******************************
+app.get('/device_update2.json', function(req, res) {
+        var filePath = '../web/device_update2.json';
+        retrieve_file(filePath,res);
+});
+//*******************************
+
+
+
+
+//*******************************
+app.get('/executionmanager.html', function(req, res) {
+        var filePath = '../web/executionmanager.html';
+        retrieve_file(filePath,res);
+}); 
+//*******************************
+app.get('/exec_new.html', function(req, res) {
+        var filePath = '../web/exec_new.html';
+        retrieve_file(filePath,res);
+});
+//*******************************
+app.get('/exec_update.html', function(req, res) {
+        var filePath = '../web/exec_update.html';
+        retrieve_file(filePath,res);
+}); 
+//*******************************
+app.get('/exec_list.html', function(req, res) {
+        var filePath = '../web/exec_list.html';
+        retrieve_file(filePath,res);
+});
+//*******************************
+app.get('/exec_update1.json', function(req, res) {
+        var filePath = '../web/exec_update1.json';
+        retrieve_file(filePath,res);
+});
+//*******************************
+app.get('/exec_update2.json', function(req, res) {
+        var filePath = '../web/exec_update2.json';
+        retrieve_file(filePath,res);
+});
+//*******************************
+
+
+
+
 //*******************************
 app.get('/query_metadata.html', function(req, res) { 
 	var filePath = 'web/query_metadata.html';
 	retrieve_file(filePath,res);
-});
+}); 
 //***********************************
-app.get('/app_list.html', function(req, res) { 
-	var filePath = '../web/app_list.html';
+
+
+//*******************************
+app.get('/PleaseEnableJavascript.html', function(req, res) { 
+	var filePath = 'web/PleaseEnableJavascript.html';
 	retrieve_file(filePath,res);
-});
+}); 
 //***********************************
+
+
 // Path only accesible when Authenticated
 app.get('/private',middleware.ensureAuthenticated, function(req, res) {
 	var message = "\n\nAccess to restricted content !!!.\n\n"
@@ -927,9 +1015,13 @@ app.get('/get_app_list', function(req, res) {
 				res.end("error requesting list of apps", 'utf-8');
 				return;
 			});  
-		}else{
+		}else{ 
 			res.writeHead(430, {"Content-Type": contentType_text_plain});	//not put 200 then webpage works
-			res.end("Empty list of Apps" );  
+			if(projectname.length==0){
+				res.end("Empty list of Apps" ); 
+			}else{
+				res.end("App \""+projectname+"\" not found");
+			}
 			return;
 		}
 	},(resultReject)=> { 
@@ -946,6 +1038,7 @@ app.get('/query_task',middleware.ensureAuthenticated, function(req, res) {
 	var pretty 		= find_param(req.body.pretty, req.query.pretty);
 	var projectname	= find_param(req.body.project, req.query.project);
 	projectname= validate_parameter(projectname,"project",currentdate,res.user, req.connection.remoteAddress);//generates the error log if not defined
+	if(projectname==undefined) projectname="";
 	if (projectname.length == 0){ 
 		res.writeHead(400, { 'Content-Type': contentType_text_plain });
 		res.end("\n400: Bad Request, missing " + "project" + ".\n");
@@ -1175,8 +1268,6 @@ function register_device_status(req, res,new_device){
 	var result_id =request_device_id(devicename);//if there is not such device, will register as new one
 	result_id.then((device_id) => { 
 		var result_status_id =request_device_status_id(device_id);//if there is not such device status, will register as new one
-
-	
 		result_status_id.then((resultFind_id) => { 
 			//we have the device_status_id, now is the time to add the new json -> jsontext
 			
@@ -1196,11 +1287,7 @@ function register_device_status(req, res,new_device){
 			res.end("register_device_status: Bad Request "+resultReject +"\n");
 			var resultlogb = LogsModule.register_log(es_servername+":"+es_port,SERVERDB,400,req.connection.remoteAddress," BAD Request on query:"
 				+JSON.stringify(mybody_obj),currentdate,res.user);
-		});		
-		
-		
-			
-		
+		});
 	},(resultReject)=> {
 		res.writeHead(resultReject.code, {"Content-Type": contentType_text_plain});
 		res.end(resultReject.text + "\n", 'utf-8');
@@ -1219,12 +1306,51 @@ app.post('/update_device',middleware.ensureAuthenticated, function(req, res) { /
 app.post('/update_device_status',middleware.ensureAuthenticated, function(req, res) { //this is for the table devices_status
 	register_device_status(req, res,false);
 });
+//********************************************************** 
+app.get('/get_device_list', function(req, res) {
+	"use strict"; 
+	var currentdate = dateFormat(new Date(), "yyyy-mm-dd'T'HH:MM:ss.l");  
+	var message_bad_request = "UPLOAD Bad Request missing "; 
+	var pretty		= find_param(req.body.pretty, req.query.pretty);
+	var devicename	= CommonModule.remove_quotation_marks(find_param(req.body.device, req.query.device));
+
+	if (devicename==undefined) devicename=""; 
+	var result_count = DeviceModule.query_count_device(es_servername + ":" + es_port,SERVERDB, devicename);
+	result_count.then((resultResolve) => { 
+		if(resultResolve!=0){//new entry (2) we resister new entry
+			var result_id = DeviceModule.find_device(es_servername + ":" + es_port,SERVERDB, devicename,pretty); 
+			result_id.then((result_json) => { 
+				res.writeHead(200, {"Content-Type": contentType_text_plain});   
+				res.end(result_json); 
+				return; 
+			},(result_idReject)=> {
+				res.writeHead(400, {"Content-Type": contentType_text_plain});
+				res.end("error requesting list of Devices", 'utf-8');
+				return;
+			});  
+		}else{
+			res.writeHead(430, {"Content-Type": contentType_text_plain});	//not put 200 then webpage works
+			if(devicename.length==0){
+				res.end("Empty list of Devices" ); 
+			}else{
+				res.end("Device \""+devicename+"\" not found");
+			}
+			return;
+		}
+	},(resultReject)=> { 
+		res.writeHead(400, {"Content-Type": contentType_text_plain});
+		res.end(resultReject + "\n", 'utf-8'); //error counting projects in the DB
+		var resultlog = LogsModule.register_log( es_servername + ":" + es_port,SERVERDB,400,req.connection.remoteAddress,"ERROR on requesting list of Devices",currentdate,res.user); 
+		return;
+	});
+});
 //**********************************************************
 app.get('/query_device',middleware.ensureAuthenticated, function(req, res) {  
 	var currentdate	= dateFormat(new Date(), "yyyy-mm-dd'T'HH:MM:ss.l"); 
 	var pretty 		= find_param(req.body.pretty, req.query.pretty);
 	var devicename	= find_param(req.body.device, req.query.device);
-	devicename= validate_parameter(devicename,"device",currentdate,res.user, req.connection.remoteAddress);//generates the error log if not defined 
+	devicename= validate_parameter(devicename,"device",currentdate,res.user, req.connection.remoteAddress);//generates the error log if not defined
+	if(devicename==undefined) devicename="";
 	if (devicename.length == 0){  
 		res.writeHead(400, { 'Content-Type': contentType_text_plain });
 		res.end("\n400: Bad Request, missing " + "device" + ".\n");
@@ -1273,6 +1399,7 @@ app.get('/query_device_status',middleware.ensureAuthenticated, function(req, res
 	var pretty 		= find_param(req.body.pretty, req.query.pretty);
 	var devicename	= find_param(req.body.device, req.query.device);
 	devicename= validate_parameter(devicename,"device",currentdate,res.user, req.connection.remoteAddress);//generates the error log if not defined 
+	if(devicename==undefined) devicename="";
 	if (devicename.length == 0){
 		res.writeHead(400, { 'Content-Type': contentType_text_plain });
 		res.end("\n400: Bad Request, missing " + "device" + ".\n");
@@ -1482,12 +1609,53 @@ app.post('/register_new_exec',middleware.ensureAuthenticated, function(req, res)
 //********************************************************** 
 app.post('/update_exec',middleware.ensureAuthenticated, function(req, res) { //this is for the table executions_status, all the info is in a JSON file, will update and merge with existing fields
 	register_exec(req, res,false);
-}); 
+});  
+//********************************************************** 
+app.get('/get_exec_list', function(req, res) {
+	"use strict"; 
+	var currentdate = dateFormat(new Date(), "yyyy-mm-dd'T'HH:MM:ss.l");  
+	var message_bad_request = "UPLOAD Bad Request missing "; 
+	var pretty		= find_param(req.body.pretty, req.query.pretty);
+	var execname	= CommonModule.remove_quotation_marks(find_param(req.body.app, req.query.app));
+	if (execname==undefined) execname="";
+	var result_count = ExecsModule.query_count_exec(es_servername + ":" + es_port,SERVERDB, execname);
+	result_count.then((resultResolve) => {
+		if(resultResolve!=0){//new entry (2) we resister new entry
+			var result_id = ExecsModule.find_exec(es_servername + ":" + es_port,SERVERDB, execname,pretty); 
+			result_id.then((result_json) => { 
+				res.writeHead(200, {"Content-Type": contentType_text_plain});   
+				res.end(result_json); 
+				return; 
+			},(result_idReject)=> {
+				res.writeHead(400, {"Content-Type": contentType_text_plain});
+				res.end("error requesting list of executed apps", 'utf-8');
+				return;
+			});  
+		}else{
+			res.writeHead(430, {"Content-Type": contentType_text_plain});	//not put 200 then webpage works
+			if(execname.length==0){
+				res.end("Empty list of Executed Apps" ); 
+			}else{
+				res.end("Executions of the App \""+execname+"\" not found");
+			}
+			return;
+		}
+	},(resultReject)=> { 
+		res.writeHead(400, {"Content-Type": contentType_text_plain});
+		res.end(resultReject + "\n", 'utf-8'); //error counting projects in the DB
+		var resultlog = LogsModule.register_log( es_servername + ":" + es_port,SERVERDB,400,req.connection.remoteAddress,"ERROR on requesting list of executed apps",currentdate,res.user); 
+		return;
+	});
+});
+
+//**********************************************************
 app.get('/query_exec',middleware.ensureAuthenticated, function(req, res) {  
 	var currentdate	= dateFormat(new Date(), "yyyy-mm-dd'T'HH:MM:ss.l"); 
 	var pretty 		= find_param(req.body.pretty, req.query.pretty);
 	var appname	= find_param(req.body.app, req.query.app);
 	appname= validate_parameter(appname,"app",currentdate,res.user, req.connection.remoteAddress);//generates the error log if not defined 
+	
+	if(appname==undefined) appname="";
 	if (appname.length == 0){  
 		res.writeHead(400, { 'Content-Type': contentType_text_plain });
 		res.end("\n400: Bad Request, missing " + "app" + ".\n");
@@ -1686,9 +1854,9 @@ app.get('/login', function(req, res) {
 			resultlog = LogsModule.register_log(es_servername+":"+es_port,SERVERDB, 200, req.connection.remoteAddress, "New token Generated",currentdate,"");
 		}else{
 			res.writeHead(401, {"Content-Type": contentType_text_plain});
-			res.end("401 (Unauthorized) Autentication failed, incorrect user "+ email +" or passwd "+ pw +"\n"); 
+			res.end("401 (Unauthorized) Autentication failed, incorrect user " +" or passwd " +"\n"); 
 			resultlog = LogsModule.register_log(es_servername+":"+es_port,SERVERDB, 401, req.connection.remoteAddress, 
-				"401: Bad Request of Token, incorrect user or passwd "+email+"or passwd "+pw,currentdate,"");
+				"401: Bad Request of Token, incorrect user or passwd "+email+"or passwd ",currentdate,"");
 		}
 	},(resultReject)=> { 
 		res.writeHead(400, {"Content-Type": contentType_text_plain});

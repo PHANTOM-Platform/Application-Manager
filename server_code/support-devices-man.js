@@ -82,6 +82,7 @@ register_json: function(es_server, my_index, body, remoteAddress, my_type) {
 		});
 	});
 }, //end register_json
+
 //***************************************************
 register_device_json: function(es_server, my_index, body, remoteAddress) {
 	const my_type = 'devices' ; 
@@ -202,27 +203,57 @@ find_device: function(es_server, my_index, device, pretty){
 		var client = new elasticsearch.Client({
 			host: es_server,
 			log: 'error'
-		});
-		client.search({
-			index: my_index,
-			type: my_type, 
-			body: {
-				"query":{"bool":{"must":[
-					{"match_phrase":{"device": device }}, {"term":{"device_length": device.length}}
-				]}}
-			}
-		}, function(error, response) {
-			if (error) { 
-				reject ("error: "+error);
-			}else{
-				item = JSON.parse(JSON.stringify(response.hits.hits[0]._source));
-				if((pretty=="true")||(pretty=="TRUE")){ 
-					resolve(" "+(JSON.stringify(item, null, 4)));
-				}else{ 
-					resolve(" "+(JSON.stringify(item)));
+		});  
+		if(device==undefined){
+			resolve({});
+		}else if(device.length==0){  
+			client.search({
+				index: my_index,
+				type: my_type, 
+				size: 10000,
+				body:{"query":{"match_all": {} }}
+			}, function(error, response) { 
+				if (error){
+					reject("search error: "+error)
+				} else {
+					var result="";
+					var keys = Object.keys(response.hits.hits);
+					keys.forEach(function(key) { 
+						item = JSON.parse(JSON.stringify(response.hits.hits[key]._source));
+						if(result!=""){
+							result+=",";
+						}
+						if((pretty=="true")||(pretty=="TRUE")){ 
+							result+=" "+(JSON.stringify(item, null, 4));
+						}else{ 
+							result+=" "+(JSON.stringify(item));
+						}
+					});
+				};
+				resolve("{\"hits\" :["+result+"]}");  
+			});
+		}else{ 
+			client.search({
+				index: my_index,
+				type: my_type, 
+				body: {
+					"query":{"bool":{"must":[
+							{"match_phrase":{"device": device }}, {"term":{"device_length": device.length}}
+					]}}
 				}
-			}
-		});
+			}, function(error, response) {
+				if (error) { 
+					reject ("error: "+error);
+				}else{
+					item = JSON.parse(JSON.stringify(response.hits.hits[0]._source));
+					if((pretty=="true")||(pretty=="TRUE")){ 
+						resolve(" "+(JSON.stringify(item, null, 4)));
+					}else{ 
+						resolve(" "+(JSON.stringify(item)));
+					}
+				}
+			});
+		} 		
 	});
 },
 //****************************************************
@@ -258,7 +289,7 @@ query_count_device_id: function(es_server, my_index, device_id){
 			});
 		}
 	});
-}, //end query_count_device
+}, //end query_count_device_id
 //****************************************************
 //This function is used to confirm that an user exists or not in the DataBase.
 query_count_device: function(es_server, my_index, device){ 
@@ -271,6 +302,21 @@ query_count_device: function(es_server, my_index, device){
 		});
 		if(device==undefined){
 			resolve(0);
+		}else if(device.length==0){ 
+			client.count({
+				index: my_index,
+				type: my_type, 
+				body:{"query":{"match_all": {} }}
+			}, function(error, response) {
+				if (error) { 
+					reject (error);
+				}
+				if (response.count !== undefined) {
+					resolve (response.count);//size
+				}else{
+					resolve (0);//size
+				} 
+			});			
 		}else{
 			client.count({
 				index: my_index,
@@ -324,7 +370,7 @@ query_count_device_status: function(es_server, my_index, device_id){
 			});
 		}
 	});
-}, //end query_count_device
+}, //end query_count_device_status
 //**********************************************************
 query_device: function(es_server, my_index, bodyquery, pretty) {
 	const my_type = 'devices';
