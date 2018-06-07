@@ -346,18 +346,21 @@ function consolelogjson(JSONstring ){
 //the purpose is to remove the fields/properties path,path_length, filename,filename_length, if present.
 //and generate thos fields/properties from the input parameters
 function update_filename_path_on_json(JSONstring, filename, path){ 
-	var new_json = {  } 
+	var new_json = {  }  
 	var jsonobj = JSON.parse(JSONstring);
 	var keys = Object.keys(jsonobj); 
 	new_json['path']		=path;
-	new_json['path_length']	=path.length; //label can not contain points '.' !
+	new_json['path'+'_length']	=path.length; //label can not contain points '.' !
 	new_json['filename']	=filename;
-	new_json['filename_length']=filename.length;	
+	new_json['filename'+'_length']=filename.length;	
 	for (var i = 0; i < keys.length; i++) {
 		var label=Object.getOwnPropertyNames(jsonobj)[i];
 		label=label.toLowerCase();
 		if((label != 'path') && (label != 'filename') && (label != 'path_length') && (label != 'filename_length'))
-		new_json[label]=jsonobj[keys[i]];	//add one property 
+			new_json[label]=jsonobj[keys[i]];	//add one property  
+		if( typeof jsonobj[keys[i]] == 'string'){
+			new_json[label+'_length']=jsonobj[keys[i]].length;			
+		}
 	} 
 	new_json=(JSON.stringify(new_json));
 	return new_json;
@@ -373,7 +376,10 @@ function update_device_length_on_json(JSONstring, device){
 		var label=Object.getOwnPropertyNames(jsonobj)[i];
 		label=label.toLowerCase();
 		if((label != 'device') && (label != 'device_length'))
-		new_json[label]=jsonobj[keys[i]];	//add one property 
+		new_json[label]=jsonobj[keys[i]];	//add one property
+		if( typeof jsonobj[keys[i]] == 'string'){
+			new_json[label+'_length']=jsonobj[keys[i]].length;			
+		}		
 	} 
 	new_json=(JSON.stringify(new_json));
 	return new_json;
@@ -389,7 +395,10 @@ function update_app_length_on_json(JSONstring, appname){
 		var label=Object.getOwnPropertyNames(jsonobj)[i];
 		label=label.toLowerCase();
 		if((label != 'app') && (label != 'app_length'))
-		new_json[label]=jsonobj[keys[i]];	//add one property 
+		new_json[label]=jsonobj[keys[i]];	//add one property
+		if( typeof jsonobj[keys[i]] == 'string'){
+			new_json[label+'_length']=jsonobj[keys[i]].length;			
+		}		
 	} 
 	new_json=(JSON.stringify(new_json));
 	return new_json;
@@ -451,13 +460,14 @@ function update_projectname_length_on_json(JSONstring, projectname){
 		var label=Object.getOwnPropertyNames(jsonobj)[i];
 		label=label.toLowerCase();
 		if((label != 'project') && (label != 'project_length'))
-		new_json[label]=jsonobj[keys[i]];	//add one property 
+		new_json[label]=jsonobj[keys[i]];	//add one property
+		if( typeof jsonobj[keys[i]] == 'string'){
+			new_json[label+'_length']=jsonobj[keys[i]].length;			
+		}
 	} 
 	new_json=(JSON.stringify(new_json));
 	return new_json;
 }
-
-
 //**********************************************************
 function validate_parameter(parameter,label,currentdate,user,address){
 	var message_error = "DOWNLOAD Bad Request missing "+label;  
@@ -551,55 +561,55 @@ app.get('/servername', function(req, res, next) {
 });
 //**********************************************************
 app.get('/appmanager.html', function(req, res) {
-        var filePath = '../web/appmanager.html';
-        retrieve_file(filePath,res);
+	var filePath = '../web/appmanager.html';
+	retrieve_file(filePath,res);
 });
 //**********************************************************
 app.get('/appmanager.css', function(req, res) {
-        var filePath = '../web/appmanager.css';
-        retrieve_file(filePath,res);
+	var filePath = '../web/appmanager.css';
+	retrieve_file(filePath,res);
 });
 //*******************************
 app.get('/appmanager.js', function(req, res) {
-        var filePath = '../web/appmanager.js';
-        retrieve_file(filePath,res);
+	var filePath = '../web/appmanager.js';
+	retrieve_file(filePath,res);
 });
 
 
 //*******************************
 app.get('/phantom.gif', function(req, res) {
-        var filePath = '../web/phantom.gif';
-        retrieve_file(filePath,res);
+	var filePath = '../web/phantom.gif';
+	retrieve_file(filePath,res);
 });
 //*******************************
 app.get('/app_new.html', function(req, res) {
-        var filePath = '../web/app_new.html';
-        retrieve_file(filePath,res);
+	var filePath = '../web/app_new.html';
+	retrieve_file(filePath,res);
 });
 //*******************************
 app.get('/app_update.html', function(req, res) {
-        var filePath = '../web/app_update.html';
-        retrieve_file(filePath,res);
+	var filePath = '../web/app_update.html';
+	retrieve_file(filePath,res);
 }); 
 //*******************************
 app.get('/app_list.html', function(req, res) {
-        var filePath = '../web/app_list.html';
-        retrieve_file(filePath,res);
+	var filePath = '../web/app_list.html';
+	retrieve_file(filePath,res);
 });
 //*******************************
 app.get('/app_update1.json', function(req, res) {
-        var filePath = '../web/app_update1.json';
-        retrieve_file(filePath,res);
+	var filePath = '../web/app_update1.json';
+	retrieve_file(filePath,res);
 });
 //*******************************
 app.get('/app_update2.json', function(req, res) {
-        var filePath = '../web/app_update2.json';
-        retrieve_file(filePath,res);
+	var filePath = '../web/app_update2.json';
+	retrieve_file(filePath,res);
 });
 //*******************************
 app.get('/app_update3.json', function(req, res) {
-        var filePath = '../web/app_update3.json';
-        retrieve_file(filePath,res);
+	var filePath = '../web/app_update3.json';
+	retrieve_file(filePath,res);
 });
 
 
@@ -607,13 +617,13 @@ app.get('/app_update3.json', function(req, res) {
 
 //*******************************
 app.get('/devicemanager.html', function(req, res) {
-        var filePath = '../web/devicemanager.html';
-        retrieve_file(filePath,res);
+	var filePath = '../web/devicemanager.html';
+	retrieve_file(filePath,res);
 }); 
 //*******************************
 app.get('/device_new.html', function(req, res) {
-        var filePath = '../web/device_new.html';
-        retrieve_file(filePath,res);
+	var filePath = '../web/device_new.html';
+	retrieve_file(filePath,res);
 });
 //*******************************
 app.get('/device_update.html', function(req, res) {
@@ -622,75 +632,64 @@ app.get('/device_update.html', function(req, res) {
 }); 
 //*******************************
 app.get('/device_list.html', function(req, res) {
-        var filePath = '../web/device_list.html';
-        retrieve_file(filePath,res);
+	var filePath = '../web/device_list.html';
+	retrieve_file(filePath,res);
 });
 //*******************************
 app.get('/device_update1.json', function(req, res) {
-        var filePath = '../web/device_update1.json';
-        retrieve_file(filePath,res);
+	var filePath = '../web/device_update1.json';
+	retrieve_file(filePath,res);
 });
 //*******************************
 app.get('/device_update2.json', function(req, res) {
-        var filePath = '../web/device_update2.json';
-        retrieve_file(filePath,res);
+	var filePath = '../web/device_update2.json';
+	retrieve_file(filePath,res);
 });
 //*******************************
 
 
-
-
-//*******************************
 app.get('/executionmanager.html', function(req, res) {
-        var filePath = '../web/executionmanager.html';
-        retrieve_file(filePath,res);
+	var filePath = '../web/executionmanager.html';
+	retrieve_file(filePath,res);
 }); 
 //*******************************
 app.get('/exec_new.html', function(req, res) {
-        var filePath = '../web/exec_new.html';
-        retrieve_file(filePath,res);
+	var filePath = '../web/exec_new.html';
+	retrieve_file(filePath,res);
 });
 //*******************************
 app.get('/exec_update.html', function(req, res) {
-        var filePath = '../web/exec_update.html';
-        retrieve_file(filePath,res);
+	var filePath = '../web/exec_update.html';
+	retrieve_file(filePath,res);
 }); 
 //*******************************
 app.get('/exec_list.html', function(req, res) {
-        var filePath = '../web/exec_list.html';
-        retrieve_file(filePath,res);
+	var filePath = '../web/exec_list.html';
+	retrieve_file(filePath,res);
 });
 //*******************************
 app.get('/exec_update1.json', function(req, res) {
-        var filePath = '../web/exec_update1.json';
-        retrieve_file(filePath,res);
+	var filePath = '../web/exec_update1.json';
+	retrieve_file(filePath,res);
 });
 //*******************************
 app.get('/exec_update2.json', function(req, res) {
-        var filePath = '../web/exec_update2.json';
-        retrieve_file(filePath,res);
+	var filePath = '../web/exec_update2.json';
+	retrieve_file(filePath,res);
 });
 //*******************************
 
 
-
-
-//*******************************
 app.get('/query_metadata.html', function(req, res) { 
 	var filePath = 'web/query_metadata.html';
 	retrieve_file(filePath,res);
 }); 
-//***********************************
-
-
 //*******************************
 app.get('/PleaseEnableJavascript.html', function(req, res) { 
 	var filePath = 'web/PleaseEnableJavascript.html';
 	retrieve_file(filePath,res);
 }); 
 //***********************************
-
-
 // Path only accesible when Authenticated
 app.get('/private',middleware.ensureAuthenticated, function(req, res) {
 	var message = "\n\nAccess to restricted content !!!.\n\n"
@@ -1264,7 +1263,11 @@ function register_device_status(req, res,new_device){
 	//3 if already exists, we need to merge with the existing entries, updating those fields redefined in the json
 	var jsontext =req.files.UploadJSON.data.toString('utf8'); 	
 	var devicename= get_value_json(jsontext,"device"); //(1) parsing the JSON
-	devicename=devicename.value;   
+	devicename=devicename.value;
+	jsontext =update_device_length_on_json(jsontext, devicename); //this adds the field device.length	
+	
+// 	console.log("send_device_update_to_suscribers("+devicename+")");
+	send_device_update_to_suscribers(devicename,jsontext);	
 	var result_id =request_device_id(devicename);//if there is not such device, will register as new one
 	result_id.then((device_id) => { 
 		var result_status_id =request_device_status_id(device_id);//if there is not such device status, will register as new one
@@ -1280,7 +1283,7 @@ function register_device_status(req, res,new_device){
 				res.writeHead(400, {"Content-Type": contentType_text_plain});
 				res.end(resultReject + "\n", 'utf-8');
 				resultlog = LogsModule.register_log( es_servername + ":" + es_port,SERVERDB,400,req.connection.remoteAddress,"Upload Error",currentdate,res.user); 
-			});					
+			});
 			
 		},(resultReject)=> {
 			res.writeHead(400, {"Content-Type": contentType_text_plain});
@@ -1835,7 +1838,7 @@ app.get('/login', function(req, res) {
 	var pw=find_param(req.body.pw, req.query.pw); 	
 	if (pw == undefined){
 		res.writeHead(400, {"Content-Type": contentType_text_plain});
-		res.end("400: Bad Request, missing Passwd\n"); 
+		res.end("400: Bad Request, missing Passwd\n");
 		resultlog = LogsModule.register_log(es_servername+":"+es_port,SERVERDB, 400, req.connection.remoteAddress, "400: Bad Request, missing Passwd",currentdate,"");
 		return;
 	}
