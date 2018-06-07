@@ -26,7 +26,7 @@ bash ../api_command_line/demo_admin_appman_curl.sh
 
 #### 3.- run a client, which will suscribe to some entries at the Projects (tasks), Devices, and app Executions TABLES.
 ```bash
-bash test_appman_ws_suscriber.sh;
+bash test_client_ws_suscriber_appmanager.sh;
 ```
 
 #### 4.- Perform some updates to the APP-Resource Manager, which will be forwared to the suscribed client
