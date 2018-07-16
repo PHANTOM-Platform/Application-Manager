@@ -15,15 +15,15 @@
 // 		WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // 		See the License for the specific language governing permissions and
 // 		limitations under the License.
-process.title = 'PHANTOM-Application-Manager-server';
+process.title = 'PHANTOM-Execution-Manager-server';
 
 //****************** VARIABLES OF THE REPOSITORY SERVER, MODIFY DEPENDING ON YOUR DEPLOYMENT *****
 	const es_servername = 'localhost';
 	const es_port = 9400;
 	const ips = ['::ffff:127.0.0.1','127.0.0.1',"::1"];
-	const SERVERNAMElong ="PHANTOM Application Manager";
-	const SERVERNAME ='PHANTOM Application Manager';
-	const SERVERPORT = 8500;
+	const SERVERNAMElong ="PHANTOM Execution Manager";
+	const SERVERNAME ='PHANTOM Execution Manager';
+	const SERVERPORT = 8700;
 	const SERVERDB = "manager_db";
 	
 	// This will be allocated in the home folder of the user running nodejs !! os.homedir()+File_Server_Path
@@ -855,55 +855,54 @@ app.get('/es_query_metadata', middleware.ensureAuthenticated, function(req, res)
 	}); 
 }); 
 //********************************************************** 
-function register_task(req, res,new_task){
-	"use strict"; 
-	var currentdate = dateFormat(new Date(), "yyyy-mm-dd'T'HH:MM:ss.l");  
+function register_exec(req, res,new_exec){
+	"use strict";
+	var currentdate = dateFormat(new Date(), "yyyy-mm-dd'T'HH:MM:ss.l");
 	var message_bad_request = "UPLOAD Bad Request missing ";
-	var resultlog ; 
+	var resultlog ;
 	if (!req.files){
 		res.writeHead(400, { 'Content-Type': contentType_text_plain });
-		res.end('No files were uploaded.'); 
+		res.end('No files were uploaded.');
 		resultlog = LogsModule.register_log(es_servername + ":" + es_port,SERVERDB, 400,req.connection.remoteAddress,'No files were uploaded.',currentdate,res.user);
 		return;
 	}  
 	if (req.files.UploadJSON == undefined){
 		res.writeHead(400, { 'Content-Type': contentType_text_plain });
-		res.end('Error Json file not found.'); 
+		res.end('Error Json file not found.');
 		resultlog = LogsModule.register_log(es_servername + ":" + es_port,SERVERDB, 400,req.connection.remoteAddress,'Error Json file not found.',currentdate,res.user);
 		return;
 	}
-	//1 Parse the JSON and find the Project.
+	//1 Parse the JSON and find the app name.
 	//2 If not existing in the db, then we will just register the JSON content
 	//3 if already exists, we need to merge with the existing entries, updating those fields redefined in the json
-	var jsontext =req.files.UploadJSON.data.toString('utf8');	
-	var projectname= get_value_json(jsontext,"project"); //(1) parsing the JSON
-	projectname=projectname.value;  
+	var jsontext =req.files.UploadJSON.data.toString('utf8');
+	var appname= get_value_json(jsontext,"app"); //(1) parsing the JSON
+	appname=appname.value;
+	jsontext =update_app_length_on_json(jsontext, appname); //this adds the field app.length
 	
-	jsontext =  update_projectname_length_on_json(jsontext, projectname);
-	
-// 	console.log("send_project_update_to_suscribers("+projectname+")");
-	send_project_update_to_suscribers(projectname,jsontext);	
-	var result_count = TasksModule.query_count_project(es_servername + ":" + es_port,SERVERDB, projectname);
+// 	console.log("send_exec_update_to_suscribers("+appname+")");
+	send_exec_update_to_suscribers(appname,jsontext);	
+	var result_count = ExecsModule.query_count_exec(es_servername + ":" + es_port,SERVERDB, appname);
 	result_count.then((resultResolve) => {
-		if(resultResolve==0){//new entry (2) we resister new entry 
-			var result = TasksModule.register_json(es_servername + ":" + es_port,SERVERDB, jsontext,""); 
+		if(resultResolve==0){//new entry (2) we resister new entry
+			var result = ExecsModule.register_exec_json(es_servername + ":" + es_port,SERVERDB, jsontext);
 			result.then((resultResolve) => {
-				resultlog = LogsModule.register_log(es_servername + ":" + es_port,SERVERDB, 200,req.connection.remoteAddress,"Add task Succeed",currentdate,res.user);  
+				resultlog = LogsModule.register_log(es_servername + ":" + es_port,SERVERDB, 200,req.connection.remoteAddress,"Add task Succeed",currentdate,res.user);
 				res.writeHead(resultResolve.code, {"Content-Type": contentType_text_plain});
 				res.end(resultResolve.text + "\n", 'utf-8');
 			},(resultReject)=> {
 				res.writeHead(resultReject.code, {"Content-Type": contentType_text_plain});
 				res.end(resultReject.text + "\n", 'utf-8');
-				resultlog = LogsModule.register_log( es_servername + ":" + es_port,SERVERDB,400,req.connection.remoteAddress,"Upload Error",currentdate,res.user); 
+				resultlog = LogsModule.register_log( es_servername + ":" + es_port,SERVERDB,400,req.connection.remoteAddress,"Upload Error",currentdate,res.user);
 			});
 			return;
-		}else if (new_task==true){
+		}else if (new_exec==true){
 			res.writeHead(400, {"Content-Type": contentType_text_plain});
-			res.end("[ERROR] Can not register as new PROJECT, because there is an alredy registered PROJECT with that name\n", 'utf-8'); 
+			res.end("[ERROR] Can not register as new executions_status, because there is an alredy registered executions_status with that name\n", 'utf-8');
 			return;
 		}else{ //already existing, (3.1) first we get the registered json
-			var result_id = TasksModule.find_project_id(es_servername + ":" + es_port,SERVERDB, projectname); 
-			result_id.then((result_idResolve) => { 
+			var result_id = ExecsModule.find_exec_id(es_servername + ":" + es_port,SERVERDB, appname);
+			result_id.then((result_idResolve) => {
 				var elasticsearch = require('elasticsearch');
 				var clientb = new elasticsearch.Client({
 					host: es_servername + ":" + es_port,
@@ -913,7 +912,7 @@ function register_task(req, res,new_task){
 					var mergejson = JSON.parse(jsontext);
 					clientb.update({//index replaces the json in the DB with the new one
 						index: SERVERDB,
-						type: 'tasks', 
+						type: 'executions_status', 
 						id: result_idResolve,
 						body: {doc: mergejson}
 					}, function(error, response) {
@@ -921,12 +920,11 @@ function register_task(req, res,new_task){
 							reject (error);
 						} else if(!error){
 							var verify_flush = CommonModule.my_flush( req.connection.remoteAddress ,es_servername + ":" + es_port,SERVERDB);
-							verify_flush.then((resolve_result) => { 
-								resolve ("Succeed" ); 
-							},(reject_result)=> { 
+							verify_flush.then((resolve_result) => {
+								resolve ("Succeed" );
+							},(reject_result)=> {
 								reject ( );
 							});
-							
 						}
 					});//end query client.index
 				});
@@ -941,132 +939,341 @@ function register_task(req, res,new_task){
 				});
 			},(result_idReject)=> {
 				res.writeHead(400, {"Content-Type": contentType_text_plain});
-				res.end( "error requesting id", 'utf-8');			
+				res.end( "error requesting id", 'utf-8');
 				return;
-			});  
+			});
 		}
-	},(resultReject)=> { 
+	},(resultReject)=> {
 		res.writeHead(400, {"Content-Type": contentType_text_plain});
 		res.end(resultReject + "\n", 'utf-8'); //error counting projects in the DB
-		resultlog = LogsModule.register_log( es_servername + ":" + es_port,SERVERDB,400,req.connection.remoteAddress,"ERROR on Update-register project tasks",currentdate,res.user); 
-		return;
-	});  
-}//register_task
-//********************************************************** 
-app.post('/register_new_project',middleware.ensureAuthenticated, function(req, res) {
-	register_task(req, res,true);
-});
-//********************************************************** 
-app.post('/update_project_tasks',middleware.ensureAuthenticated, function(req, res) {
-	register_task(req, res,false);
-});
-//********************************************************** 
-app.get('/get_project_list',  function(req, res) {
-	"use strict"; 
-	var currentdate = dateFormat(new Date(), "yyyy-mm-dd'T'HH:MM:ss.l");  
-	var message_bad_request = "UPLOAD Bad Request missing ";
-	var resultlog ;   
-	var pretty		= find_param(req.body.pretty, req.query.pretty);
-	var projectname	= find_param(req.body.project, req.query.project);
-	 
-	var result_count = TasksModule.query_count_project(es_servername + ":" + es_port,SERVERDB, "");
-	result_count.then((resultResolve) => {
-		if(resultResolve!=0){//new entry (2) we resister new entry  
-			var result_id = TasksModule.find_project(es_servername + ":" + es_port,SERVERDB, "", pretty); 
-			result_id.then((result_json) => { 
-				res.writeHead(410, {"Content-Type": contentType_text_plain});//not put 200 then webpage works
-				res.end( "error empty list of apps", 'utf-8'); 
-				return; 
-			},(result_idReject)=> {
-				res.writeHead(400, {"Content-Type": contentType_text_plain});
-				res.end( "error requesting list of apps", 'utf-8');
-				return;
-			});  
-		}
-	},(resultReject)=> { 
-		res.writeHead(400, {"Content-Type": contentType_text_plain});
-		res.end(resultReject + "\n", 'utf-8'); //error counting projects in the DB
-		resultlog = LogsModule.register_log( es_servername + ":" + es_port,SERVERDB,400,req.connection.remoteAddress,"ERROR on requesting list of apps",currentdate,res.user); 
+		resultlog = LogsModule.register_log( es_servername + ":" + es_port,SERVERDB,400,req.connection.remoteAddress,"ERROR on Update-register executions_status",currentdate,res.user);
 		return;
 	});
+}//register_exec
+
+//**********************************************************
+//this function returns the exec_id of the requested app name, if not exists then it is created a new register with the app name and not hide as only filled fields
+function request_exec_id(appname){
+	return new Promise( (resolve,reject) => {
+		"use strict";
+		var currentdate = dateFormat(new Date(), "yyyy-mm-dd'T'HH:MM:ss.l");
+		var result_count = ExecsModule.query_count_exec(es_servername + ":" + es_port,SERVERDB, appname);
+		result_count.then((resultResolve) => {
+			if(resultResolve==0){//new entry (2) we resister new entry 
+				var jsontext= {
+					"app": appname,
+					"app_length":  appname.length,
+					"hide": "false"
+				};
+				var result = ExecsModule.register_exec_json(es_servername + ":" + es_port,SERVERDB, jsontext);
+				result.then((resultResolve) => {
+					var result_id = ExecsModule.find_exec_id(es_servername + ":" + es_port,SERVERDB, appname);
+					result_id.then((result_idResolve) => {
+						resolve (result_idResolve);
+					},(result_idReject)=> {//error finding the exec id 
+						reject("error requesting id");
+					});
+				},(resultReject)=> {//error regsiterning the new appname
+					reject (resultReject.text );
+				});
+			}else{
+				var result_id = ExecsModule.find_exec_id(es_servername + ":" + es_port,SERVERDB, appname);
+				result_id.then((result_idResolve) => {
+					resolve(result_idResolve);
+				},(result_idReject)=> {//error finding the exec id
+					reject( "error requesting id" );
+				});
+			}
+		},(resultReject)=> { //error looking for appname
+			reject(resultReject );
+		});
+	});
+}//request_exec_id
+
+//********************************************************** 
+app.get('/get_user_defined_metrics', function(req, res) { //this is for the table executions_status, all the info is in a JSON file
+	var currentdate = dateFormat(new Date(), "yyyy-mm-dd'T'HH:MM:ss.l");
+ 	var appid		= CommonModule.remove_quotation_marks(find_param(req.body.appid, req.query.appid));
+	var execfile	= CommonModule.remove_quotation_marks(find_param(req.body.execfile, req.query.execfile));
+	var experimentid	= CommonModule.remove_quotation_marks(find_param(req.body.execution, req.query.execution));
+	if((execfile==undefined) || (appid==undefined) || ( experimentid ==undefined ) ){
+		res.writeHead(400, { 'Content-Type': contentType_text_plain });
+		res.end("\n400: Bad Request, missing " + "parameter" + ".\n");
+		return;
+	}else{
+		var result_countagg = ExecsModule.get_user_defined_metrics(es_servername + ":" + es_port,appid, execfile, experimentid);
+		result_countagg.then((resultCount) => {
+			res.writeHead(200, {"Content-Type": contentType_text_plain});
+			res.end(resultCount);
+			return;
+		},(resultReject)=> {
+			res.writeHead(400, {"Content-Type": contentType_text_plain});
+			res.end("ERROR on counting list of executed apps, the appid+execfile \""+ appid+"_"+execfile+"\" may not be registered\n" + resultReject + "\n", 'utf-8'); //error counting projects in the DB
+			var resultlog = LogsModule.register_log( es_servername + ":" + es_port,SERVERDB,400,req.connection.remoteAddress,"ERROR on counting list of executed apps",currentdate,res.user);
+			return;
+		});
+	}
 });
 
 //********************************************************** 
-app.get('/get_app_list', function(req, res) {
-	"use strict"; 
-	var currentdate = dateFormat(new Date(), "yyyy-mm-dd'T'HH:MM:ss.l");  
-	var message_bad_request = "UPLOAD Bad Request missing "; 
+app.get('/get_component_timing', function(req, res) { //this is for the table executions_status, all the info is in a JSON file
+	var currentdate = dateFormat(new Date(), "yyyy-mm-dd'T'HH:MM:ss.l");
+ 	var appid		= CommonModule.remove_quotation_marks(find_param(req.body.appid, req.query.appid));
+	var execfile	= CommonModule.remove_quotation_marks(find_param(req.body.execfile, req.query.execfile));
+	var experimentid	= CommonModule.remove_quotation_marks(find_param(req.body.execution, req.query.execution));
+	if((execfile==undefined) || (appid==undefined) || ( experimentid ==undefined ) ){
+		res.writeHead(400, { 'Content-Type': contentType_text_plain });
+		res.end("\n400: Bad Request, missing " + "parameter" + ".\n");
+		return;
+	}else{
+		var result_countagg = ExecsModule.get_component_timing(es_servername + ":" + es_port,appid, execfile, experimentid);
+		result_countagg.then((resultCount) => {
+			res.writeHead(200, {"Content-Type": contentType_text_plain});
+			res.end(resultCount);
+			return;
+		},(resultReject)=> {
+			res.writeHead(400, {"Content-Type": contentType_text_plain});
+			res.end("ERROR on counting list of executed apps, the appid+execfile \""+ appid+"_"+execfile+"\" may not be registered\n" + resultReject + "\n", 'utf-8'); //error counting projects in the DB
+			var resultlog = LogsModule.register_log( es_servername + ":" + es_port,SERVERDB,400,req.connection.remoteAddress,"ERROR on counting list of executed apps",currentdate,res.user);
+			return;
+		});
+	}
+});
+
+//********************************************************** 
+app.get('/get_experiments_stats', function(req, res) { //this is for the table executions_status, all the info is in a JSON file
+	var currentdate = dateFormat(new Date(), "yyyy-mm-dd'T'HH:MM:ss.l");
+ 	var appid		= CommonModule.remove_quotation_marks(find_param(req.body.appid, req.query.appid));
+	var execfile	= CommonModule.remove_quotation_marks(find_param(req.body.execfile, req.query.execfile));
+	var experimentid	= CommonModule.remove_quotation_marks(find_param(req.body.execution, req.query.execution));
+	if((execfile==undefined) || (appid==undefined) || ( experimentid ==undefined ) ){
+		res.writeHead(400, { 'Content-Type': contentType_text_plain });
+		res.end("\n400: Bad Request, missing " + "parameter" + ".\n");
+		return;
+	}else{
+		var result_countagg = ExecsModule.get_exp_stats(es_servername + ":" + es_port,appid, execfile, experimentid);
+		result_countagg.then((resultCount) => {
+			res.writeHead(200, {"Content-Type": contentType_text_plain});
+			res.end(resultCount);
+			return;
+		},(resultReject)=> {
+			res.writeHead(400, {"Content-Type": contentType_text_plain});
+			res.end("ERROR on counting list of executed apps, the appid+execfile \""+ appid+"_"+execfile+"\" may not be registered\n" + resultReject + "\n", 'utf-8'); //error counting projects in the DB
+			var resultlog = LogsModule.register_log( es_servername + ":" + es_port,SERVERDB,400,req.connection.remoteAddress,"ERROR on counting list of executed apps",currentdate,res.user);
+			return;
+		});
+	}
+});
+
+//********************************************************** 
+app.get('/count_experiments_metrics', function(req, res) { //this is for the table executions_status, all the info is in a JSON file
+	var currentdate = dateFormat(new Date(), "yyyy-mm-dd'T'HH:MM:ss.l");
+ 	var appid		= CommonModule.remove_quotation_marks(find_param(req.body.appid, req.query.appid));
+	var execfile	= CommonModule.remove_quotation_marks(find_param(req.body.execfile, req.query.execfile));
+	var experimentid	= CommonModule.remove_quotation_marks(find_param(req.body.execution, req.query.execution));
+	if((execfile==undefined) || (appid==undefined) || ( experimentid ==undefined ) ){
+		res.writeHead(400, { 'Content-Type': contentType_text_plain });
+		res.end("\n400: Bad Request, missing " + "parameter" + ".\n");
+		return;
+	}else{
+		var result_countagg = ExecsModule.count_exp_metrics(es_servername + ":" + es_port,appid, execfile, experimentid);
+		result_countagg.then((resultCount) => {
+			res.writeHead(200, {"Content-Type": contentType_text_plain});
+			res.end(resultCount);
+			return;
+		},(resultReject)=> {
+			res.writeHead(400, {"Content-Type": contentType_text_plain});
+			res.end("ERROR on counting list of executed apps, the appid+execfile \""+ appid+"_"+execfile+"\" may not be registered\n" + resultReject + "\n", 'utf-8'); //error counting projects in the DB
+			var resultlog = LogsModule.register_log( es_servername + ":" + es_port,SERVERDB,400,req.connection.remoteAddress,"ERROR on counting list of executed apps",currentdate,res.user);
+			return;
+		});
+	}
+});
+
+//********************************************************** 
+app.get('/count_executions', function(req, res) { //this is for the table executions_status, all the info is in a JSON file
+	var currentdate = dateFormat(new Date(), "yyyy-mm-dd'T'HH:MM:ss.l");
+ 	var appid		= CommonModule.remove_quotation_marks(find_param(req.body.appid, req.query.appid));
+	var execfile	= CommonModule.remove_quotation_marks(find_param(req.body.execfile, req.query.execfile));
+	if((execfile==undefined) || (appid==undefined)){
+		res.writeHead(400, { 'Content-Type': contentType_text_plain });
+		res.end("\n400: Bad Request, missing " + "parameter" + ".\n");
+		return;
+	}else{
+		var result_countagg = ExecsModule.count_search_agg_id(es_servername + ":" + es_port,appid, execfile);
+		result_countagg.then((resultCount) => {
+			res.writeHead(200, {"Content-Type": contentType_text_plain});
+			res.end(resultCount);
+			return;
+		},(resultReject)=> {
+			res.writeHead(400, {"Content-Type": contentType_text_plain});
+			res.end("ERROR on counting list of executed apps, the appid+execfile \""+ appid+"_"+execfile+"\" may not be registered\n" + resultReject + "\n", 'utf-8'); //error counting projects in the DB
+			var resultlog = LogsModule.register_log( es_servername + ":" + es_port,SERVERDB,400,req.connection.remoteAddress,"ERROR on counting list of executed apps",currentdate,res.user);
+			return;
+		});
+	}
+});
+
+
+//**********************************************************
+// app.get('/list_executions',middleware.ensureAuthenticated, function(req, res) {
+app.get('/list_executions', function(req, res) { //this is for the table executions_status, all the info is in a JSON file
+	var currentdate = dateFormat(new Date(), "yyyy-mm-dd'T'HH:MM:ss.l");
+ 	var appid		= CommonModule.remove_quotation_marks(find_param(req.body.appid, req.query.appid));
+// 	var appid ="demo";, execfile ="pthread-example";
+	var execfile	= CommonModule.remove_quotation_marks(find_param(req.body.execfile, req.query.execfile));
+	if((execfile==undefined) || (appid==undefined)){
+		res.writeHead(400, { 'Content-Type': contentType_text_plain });
+		res.end("\n400: Bad Request, missing " + "parameter" + ".\n");
+		return;
+	}else{
+		var result_countagg = ExecsModule.count_search_agg_id(es_servername + ":" + es_port,appid, execfile);
+		result_countagg.then((resultCount) => {
+			if(resultCount==0){
+				res.writeHead(200, {"Content-Type": contentType_text_plain});
+				res.end("empty list of experiments!!");
+				return;
+			}else{
+				var result_agg = ExecsModule.query_search_agg_id(es_servername + ":" + es_port,appid, execfile);
+				result_agg.then((resultResolve) => {
+					res.writeHead(200, {"Content-Type": contentType_text_plain});
+					res.end(resultResolve);
+					return;
+				},(resultReject)=> {
+					res.writeHead(400, {"Content-Type": contentType_text_plain});
+					res.end(resultReject + "\n", 'utf-8'); //error counting projects in the DB
+					var resultlog = LogsModule.register_log( es_servername + ":" + es_port,SERVERDB,400,req.connection.remoteAddress,"ERROR on requesting list of executed apps",currentdate,res.user);
+					return;
+				});
+			}
+		},(resultReject)=> {
+			res.writeHead(400, {"Content-Type": contentType_text_plain});
+			res.end("ERROR on counting list of executed apps, the appid+execfile \""+ appid+"_"+execfile+"\" may not be registered\n" + resultReject + "\n", 'utf-8');//error counting projects in the DB
+			var resultlog = LogsModule.register_log( es_servername + ":" + es_port,SERVERDB,400,req.connection.remoteAddress,"ERROR on counting list of executed apps",currentdate,res.user);
+			return;
+		});
+	}
+});
+
+
+
+//********************************************************** 
+app.post('/register_new_exec',middleware.ensureAuthenticated, function(req, res) { //this is for the table executions_status, all the info is in a JSON file
+	register_exec(req, res,true);
+});
+//********************************************************** 
+app.post('/update_exec',middleware.ensureAuthenticated, function(req, res) { //this is for the table executions_status, all the info is in a JSON file, will update and merge with existing fields
+	register_exec(req, res,false);
+});
+//********************************************************** 
+app.get('/get_exec_list', function(req, res) {
+	"use strict";
+	var currentdate = dateFormat(new Date(), "yyyy-mm-dd'T'HH:MM:ss.l");
+	var message_bad_request = "UPLOAD Bad Request missing ";
 	var pretty		= find_param(req.body.pretty, req.query.pretty);
-	var projectname	= CommonModule.remove_quotation_marks(find_param(req.body.project, req.query.project));
-
-	if (projectname==undefined) projectname="";
-
-	var result_count = TasksModule.query_count_project(es_servername + ":" + es_port,SERVERDB, projectname);
+	var execname	= CommonModule.remove_quotation_marks(find_param(req.body.app, req.query.app));
+	if (execname==undefined) execname="";
+	var result_count = ExecsModule.query_count_exec(es_servername + ":" + es_port,SERVERDB, execname);
 	result_count.then((resultResolve) => {
 		if(resultResolve!=0){//new entry (2) we resister new entry
-			var result_id = TasksModule.find_project(es_servername + ":" + es_port,SERVERDB, projectname,pretty); 
-			result_id.then((result_json) => { 
-				res.writeHead(200, {"Content-Type": contentType_text_plain});   
-				res.end(result_json); 
-				return; 
+			var result_id = ExecsModule.find_exec(es_servername + ":" + es_port,SERVERDB, execname,pretty);
+			result_id.then((result_json) => {
+				res.writeHead(200, {"Content-Type": contentType_text_plain});
+				res.end(result_json);
+				return;
 			},(result_idReject)=> {
 				res.writeHead(400, {"Content-Type": contentType_text_plain});
-				res.end("error requesting list of apps", 'utf-8');
+				res.end("error requesting list of executed apps", 'utf-8');
 				return;
-			});  
-		}else{ 
+			});
+		}else{
 			res.writeHead(430, {"Content-Type": contentType_text_plain});	//not put 200 then webpage works
-			if(projectname.length==0){
-				res.end("Empty list of Apps" ); 
+			if(execname.length==0){
+				res.end("Empty list of Executed Apps" );
 			}else{
-				res.end("App \""+projectname+"\" not found");
+				res.end("Executions of the App \""+execname+"\" not found");
 			}
 			return;
 		}
-	},(resultReject)=> { 
+	},(resultReject)=> {
 		res.writeHead(400, {"Content-Type": contentType_text_plain});
-		res.end(resultReject + "\n", 'utf-8'); //error counting projects in the DB
-		var resultlog = LogsModule.register_log( es_servername + ":" + es_port,SERVERDB,400,req.connection.remoteAddress,"ERROR on requesting list of apps",currentdate,res.user); 
+		res.end(resultReject + "\n", 'utf-8');//error counting projects in the DB
+		var resultlog = LogsModule.register_log( es_servername + ":" + es_port,SERVERDB,400,req.connection.remoteAddress,"ERROR on requesting list of executed apps",currentdate,res.user);
 		return;
 	});
 });
 
 //**********************************************************
-app.get('/query_task',middleware.ensureAuthenticated, function(req, res) { 
-	var currentdate	= dateFormat(new Date(), "yyyy-mm-dd'T'HH:MM:ss.l"); 
+app.get('/query_exec',middleware.ensureAuthenticated, function(req, res) {
+	var currentdate	= dateFormat(new Date(), "yyyy-mm-dd'T'HH:MM:ss.l");
 	var pretty 		= find_param(req.body.pretty, req.query.pretty);
-	var projectname	= find_param(req.body.project, req.query.project);
-	projectname= validate_parameter(projectname,"project",currentdate,res.user, req.connection.remoteAddress);//generates the error log if not defined
-	if(projectname==undefined) projectname="";
-	if (projectname.length == 0){ 
+	var appname	= find_param(req.body.app, req.query.app);
+	appname= validate_parameter(appname,"app",currentdate,res.user, req.connection.remoteAddress);//generates the error log if not defined 
+	
+	if(appname==undefined) appname="";
+	if (appname.length == 0){
 		res.writeHead(400, { 'Content-Type': contentType_text_plain });
-		res.end("\n400: Bad Request, missing " + "project" + ".\n");
-		return;}
+		res.end("\n400: Bad Request, missing " + "app" + ".\n");
+		return;} 
 	//*******************************************  
-	var result_count = TasksModule.query_count_project(es_servername + ":" + es_port,SERVERDB, projectname);
-	result_count.then((resultResolve) => { 
+	var result_count = ExecsModule.query_count_exec(es_servername + ":" + es_port,SERVERDB, appname);
+	result_count.then((resultResolve) => {
 		if(resultResolve==0){//new entry (2) we resister new entry
 			res.writeHead(200, {"Content-Type": contentType_text_plain});
-			res.end("Not entries found for the project: " + projectname+ "\n", 'utf-8'); 
+			res.end("Not entries found for that Execution : " + appname+ "\n", 'utf-8');
 			return;
-		}else{ 
-			var result_id = TasksModule.find_project(es_servername + ":" + es_port,SERVERDB, projectname, pretty); 
+		}else{
+			var result_id = ExecsModule.find_exec_id(es_servername + ":" + es_port,SERVERDB, appname, pretty);
 			result_id.then((result_idResolve) => {
-				res.writeHead(200, {"Content-Type": contentType_text_plain});
-				res.end( result_idResolve, 'utf-8');			
-				return;	
+				
+				var mybody_obj= ExecsModule.compose_query_id(result_idResolve);
+				var searching = ExecsModule.query_exec(es_servername+":"+es_port,SERVERDB, mybody_obj, pretty);//.replace(/\//g, '\\/');
+				searching.then((resultFind) => {
+					res.writeHead(200, {"Content-Type": "application/json"});
+					res.end(resultFind+"\n");
+					var resultloga = LogsModule.register_log(es_servername+":"+es_port,SERVERDB,200,req.connection.remoteAddress,"ES-QUERY executions_status granted to query:"
+						+JSON.stringify(mybody_obj),currentdate,res.user);
+				},(resultReject)=> {
+					res.writeHead(400, {"Content-Type": contentType_text_plain});
+					res.end("es_query: Bad Request "+resultReject +"\n");
+					var resultlogb = LogsModule.register_log(es_servername+":"+es_port,SERVERDB,400,req.connection.remoteAddress,"ES-QUERY executions_status BAD Request on query:"
+						+JSON.stringify(mybody_obj),currentdate,res.user);
+				});
+				return;
 			},(result_idReject)=> {
 				res.writeHead(400, {"Content-Type": contentType_text_plain});
-				res.end( "error requesting project", 'utf-8');
-				return;				
-			}); 
+				res.end( "error requesting Execution history", 'utf-8');
+				return;
+			});
 		}
-	},(resultReject)=> { 
+	},(resultReject)=> {
 		res.writeHead(400, {"Content-Type": contentType_text_plain});
-		res.end(resultReject + "\n", 'utf-8'); //error counting projects in the DB
-		resultlog = LogsModule.register_log( es_servername + ":" + es_port,SERVERDB,400,req.connection.remoteAddress,"ERROR on Update-register project tasks",currentdate,res.user); 
+		res.end(resultReject + "\n", 'utf-8');//error counting projects in the DB
+		resultlog = LogsModule.register_log( es_servername + ":" + es_port,SERVERDB,400,req.connection.remoteAddress,"ERROR on Update-register executions_status",currentdate,res.user);
 		return;
-	});  	
+	});
+});
+//**********************************************************
+app.get('/es_query_exec', middleware.ensureAuthenticated, function(req, res) {
+	"use strict";
+	var currentdate = dateFormat(new Date(), "yyyy-mm-dd'T'HH:MM:ss.l");
+	var QueryBody 	= find_param(req.body.QueryBody, req.query.QueryBody);
+	var pretty 		= find_param(req.body.pretty, req.query.pretty);
+	var mybody_obj	= JSON.parse(QueryBody);
+	//***************************************  
+	//1.1- find id of the existing doc for such path filename JSON.stringify(
+	var searching = ExecsModule.query_exec(es_servername+":"+es_port,SERVERDB, mybody_obj, pretty);//.replace(/\//g, '\\/');
+	searching.then((resultFind) => {
+		res.writeHead(200, {"Content-Type": "application/json"});
+		res.end(resultFind+"\n");
+		var resultloga = LogsModule.register_log(es_servername+":"+es_port,SERVERDB,200,req.connection.remoteAddress,"ES-QUERY executions_status granted to query:"
+			+JSON.stringify(QueryBody),currentdate,res.user);
+	},(resultReject)=> {
+		res.writeHead(400, {"Content-Type": contentType_text_plain});
+		res.end("es_query: Bad Request "+resultReject +"\n");
+		var resultlogb = LogsModule.register_log(es_servername+":"+es_port,SERVERDB,400,req.connection.remoteAddress,"ES-QUERY executions_status BAD Request on query:"
+			+JSON.stringify(QueryBody),currentdate,res.user);
+	});
 });
 //**********************************************************
 //example:

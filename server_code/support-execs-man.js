@@ -175,7 +175,256 @@ find_exec_id: function(es_server, my_index, app){
 			}
 		});
 	});
-},//find_exec_id 
+},//find_exec_id
+
+//****************************************************
+//This function is used to confirm that an user exists or not in the DataBase.
+get_user_defined_metrics: function(es_server,  appid, execfile, experimentid){
+	const my_index = appid+'_'+ execfile;
+	return new Promise( (resolve,reject) => {
+		var elasticsearch = require('elasticsearch');
+		var client = new elasticsearch.Client({
+			host: es_server,
+			log: 'error'
+		});
+		client.search({
+			index: my_index,
+			body: {
+				"query": {
+					"terms": {
+						"type" : ["user_defined"]
+					}
+				} 
+			}
+		}, function(error, response) {
+			if (error) {
+				reject ("error"+error+"\n for index "+my_index);
+			}
+			if (response !== undefined) {
+				resolve(JSON.stringify( response.hits, null, 4));
+			}else{
+				resolve ("unexpected error, for index "+my_index);//size
+			}
+		});
+	});
+}, //end get_user_defined_metrics
+//****************************************************
+//This function is used to confirm that an user exists or not in the DataBase.
+get_component_timing: function(es_server,  appid, execfile, experimentid){
+	const my_index = appid+'_'+ execfile;
+	return new Promise( (resolve,reject) => {
+		var elasticsearch = require('elasticsearch');
+		var client = new elasticsearch.Client({
+			host: es_server,
+			log: 'error'
+		});
+		client.search({
+			index: my_index,
+			body: {
+				"query": {
+					"exists" : { "field" : "component_duration" }
+				}
+			}
+		}, function(error, response) {
+			if (error) {
+				reject ("error"+error+"\n for index "+my_index);
+			}
+			if (response !== undefined) {
+				resolve(JSON.stringify( response.hits, null, 4));
+			}else{
+				resolve ("unexpected error, for index "+my_index);//size
+			}
+		});
+	});
+}, //end get_component_timing 
+//****************************************************
+//This function is used to confirm that an user exists or not in the DataBase.
+get_exp_stats: function(es_server,  appid, execfile, experimentid){
+	const my_index = appid+'_'+ execfile;
+	const my_type = experimentid;
+	return new Promise( (resolve,reject) => {
+		var elasticsearch = require('elasticsearch');
+		var client = new elasticsearch.Client({
+			host: es_server,
+			log: 'error'
+		});
+		client.search({
+			index: my_index,
+			body: {
+				"query": {
+					"terms": {
+						"_type": [my_type ]
+					}
+				},
+				"aggs": {
+					"cpu_load_average": {
+					"avg": {
+						"field": "CPU_usage_rate"
+					} },
+					"cpu_load_count": {
+					"value_count": {
+						"field": "CPU_usage_rate"
+					} },
+					"cpu_load_max": {
+					"max": {
+						"field": "CPU_usage_rate"
+					} },
+					"cpu_load_min": {
+					"min": {
+						"field": "CPU_usage_rate"
+					} },
+					"RAM_load_average": {
+					"avg": {
+						"field": "RAM_usage_rate"
+					} },
+					"swap_load_average": {
+					"avg": {
+						"field": "swap_usage_rate"
+					} },
+					"disk_read_average": {
+					"avg": {
+						"field": "disk_read"
+					} },
+					"average_disk_write": {
+					"avg": {
+						"field": "disk_write"
+					} },
+					"disk_throughput_average": {
+					"avg": {
+						"field": "disk_throughput"
+					} },
+					"example_of_undefined_value": {
+					"avg": {
+						"field": "undefined"
+					} }
+				},
+				"size": 0
+			}
+		}, function(error, response) {
+			if (error) {
+				reject ("error"+error+"\n for index "+my_index);
+			}
+			if (response !== undefined) {
+				resolve(JSON.stringify( response.aggregations , null, 4));
+			}else{
+				resolve ("unexpected error, for index "+my_index);//size
+			}
+		});
+	});
+}, //end get_exp_stats
+
+//****************************************************
+//This function is used to confirm that an user exists or not in the DataBase.
+count_exp_metrics: function(es_server,  appid, execfile, experimentid){
+	const my_index = appid+'_'+ execfile;
+	return new Promise( (resolve,reject) => {
+		var elasticsearch = require('elasticsearch');
+		var client = new elasticsearch.Client({
+			host: es_server,
+			log: 'error'
+		});
+		client.search({
+			index: my_index,
+			body: {
+				"aggs": {
+					"typesAgg": {
+						"terms": {
+							"field": "_type",
+							"size": 200
+				}	},
+				"count":{
+					"cardinality": {
+					"field": "_type"
+					}
+				}
+				},
+				"size": 0
+			}
+		}, function(error, response) {
+			if (error) {
+				reject ("error"+error+"\n for index "+my_index);
+			}
+			if (response !== undefined) {
+				resolve(JSON.stringify( response.aggregations.count.value, null, 4));
+			}else{
+				resolve ("unexpected error, for index "+my_index);//size
+			}
+		});
+	});
+}, //end count_exp_metrics
+//****************************************************
+
+//This function is used to confirm that an user exists or not in the DataBase.
+count_search_agg_id: function(es_server,  appid, execfile){
+	const my_index = appid+'_'+ execfile;
+	return new Promise( (resolve,reject) => {
+		var elasticsearch = require('elasticsearch');
+		var client = new elasticsearch.Client({
+			host: es_server,
+			log: 'error'
+		});
+		client.search({
+			index: my_index,
+			body: {
+				"aggs": {
+					"typesAgg": {
+						"terms": {
+							"field": "_type",
+							"size": 200
+				}	},
+				"count":{
+					"cardinality": {
+					"field": "_type"
+					}
+				}
+				},
+				"size": 0
+			}
+		}, function(error, response) {
+			if (error) {
+				reject ("error"+error+"\n for index "+my_index);
+			}
+			if (response !== undefined) {
+				resolve(JSON.stringify( response.aggregations.count.value, null, 4));
+			}else{
+				resolve ("unexpected error, for index "+my_index);//size
+			}
+		});
+	});
+}, //end query_count_exec_id
+//****************************************************
+//This function is used to confirm that an user exists or not in the DataBase.
+query_search_agg_id: function(es_server,  appid, exec_id){
+	const my_index = appid+'_'+ exec_id;
+	return new Promise( (resolve,reject) => {
+		var elasticsearch = require('elasticsearch');
+		var client = new elasticsearch.Client({
+			host: es_server,
+			log: 'error'
+		});
+		client.search({
+			index: my_index,
+			body: {
+				"aggs": {
+					"typesAgg": {
+						"terms": {
+							"field": "_type",
+							"size": 200
+				}	}	},
+				"size": 0
+			}
+		}, function(error, response) {
+			if (error) {
+				reject ("error"+error+"\n for index "+my_index);
+			}
+			if (response !== undefined) {
+				resolve(JSON.stringify( response.aggregations.typesAgg.buckets, null, 4));
+			}else{
+				resolve ("unexpected error, for index "+my_index);//size
+			}
+		});
+	});
+}, //end query_count_exec_id
 //****************************************************
 //This function is used to confirm that an user exists or not in the DataBase.
 query_count_exec_id: function(es_server, my_index, exec_id){ 
