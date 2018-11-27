@@ -16,6 +16,8 @@
 // var resourceport = 2780 or 8600;
 // var execserver = appserver;
 // var execport = 8700;
+// var reposerver = appserver;
+// var repoport = 8000;
 
 // var s = 'a string', array for [], object for {}
 function getType(p) {
@@ -39,8 +41,8 @@ if (!String.prototype.endsWith) {
 }
 
 /**
- * Returns the host and port (if defined) for building the url
- * @returns {String} beginning of the url
+* Returns the host and port (if defined) for building the url
+* @returns {String} beginning of the url
 */
 function build_resource_path(){
 	var url="";
@@ -78,6 +80,19 @@ function build_execman_path(){
 				if ((execport) && execport.lenght>0){
 					url=url+":"+execport;
 	}	}}	}	}
+	return url;
+}
+
+function build_repo_path(){
+	var url="";
+	if(typeof reposerver!== 'undefined'){ // Any scope
+		if(reposerver){
+		if(reposerver.length>0){
+			url=url+"http://"+reposerver;
+			if(typeof repoport!== 'undefined') {// Any scope
+				if ((repoport) && repoport.lenght>0){
+					url=url+":"+repoport;
+	}	}	}	}}
 	return url;
 }
 
@@ -130,7 +145,6 @@ function request_share_session_storage(){
 	return false;
 }
 
-
 function share_session_storage_login(){
 	// Ask other tabs for session storage (this is ONLY to trigger event)
 	window.addEventListener('storage', function(event) {
@@ -147,12 +161,11 @@ function share_session_storage_login(){
 	return false;
 }
 
-
 /**
- * Stores the token in the sessionstorage, for share it among the browser tags
- * @param {String} mytoken.
- * @returns {boolean} true if browser supports web storage
- */
+* Stores the token in the sessionstorage, for share it among the browser tags
+* @param {String} mytoken.
+* @returns {boolean} true if browser supports web storage
+*/
 function savetoken(mytoken) {
 	var debug_phantom = document.getElementById("debug_phantom");
 	var demoreplaceb = document.getElementById("demoreplaceb");
@@ -200,6 +213,14 @@ function app_logout() {
 	return false;
 }
 
+function repo_logout() {
+	sessionStorage.setItem('token', '');
+	request_share_session_storage();
+// 	checktoken();
+	window.location = 'repository.html';
+	return false;
+}
+
 function exec_logout() {
 	sessionStorage.setItem('token', '');
 	request_share_session_storage();
@@ -208,10 +229,9 @@ function exec_logout() {
 	return false;
 }
 
-
 /**
- * Loads the phantom login menu into the html element "meny_login"
- * @returns {Boolean} return true if succeed.
+* Loads the phantom login menu into the html element "meny_login"
+* @returns {Boolean} return true if succeed.
 */
 function rm_load_menu_login(){
 	var menu_login = document.getElementById("menu_login");
@@ -236,7 +256,28 @@ function rm_load_menu_login(){
 	}
 }
 
-
+function repo_load_menu_login(){
+	var menu_login = document.getElementById("menu_login");
+	if(menu_login){
+	var menuhtml="<H1 id=\"title_login\" style=\"overflow-wrap:break-word; max-width:80%; word-break:break-all;\"><b>LOGIN into REPOSITORY-Server</b></H1>";
+	menuhtml+="<form";
+	menuhtml+="	id='requestToken'";
+	menuhtml+="	method='get'";
+	menuhtml+="	name=\"myForm\" autocomplete=\"on\">";
+// <!-- 		encType="multipart/form-data"> //for post not for get-->
+	menuhtml+="	<div class=\"center\">";
+	menuhtml+="		User: <input type=\"text\" name=\"user\" id=\"user\" value=\"\"><br>";
+	menuhtml+="		Password: <input type=\"password\" name=\"password\" id=\"password\" value=\"\" autocomplete=\"off\"> <br>";
+	menuhtml+="		<input type=\"hidden\" name=\"pretty\" value=\"true\" />";
+	menuhtml+="		<input type=\"submit\" onclick=\" repo_login(document.getElementById('user').value, document.getElementById('password').value); return false;\" value=\"LOGIN\" />";
+	menuhtml+="	</div>";
+	menuhtml+="</form>";
+	menu_login.innerHTML = menuhtml;
+	return true;
+	}else{
+		return false;
+	}
+}
 
 function app_load_menu_login(){
 	var menu_login = document.getElementById("menu_login");
@@ -261,6 +302,28 @@ function app_load_menu_login(){
 	}
 }
 
+function exec_load_menu_login(){
+	var menu_login = document.getElementById("menu_login");
+	if(menu_login){
+	var menuhtml="<H1 id=\"title_login\" style=\"overflow-wrap:break-word; max-width:80%; word-break:break-all;\"><b>LOGIN into EXECUTION-MANAGER</b></H1>";
+	menuhtml+="<form";
+	menuhtml+="	id='requestToken'";
+	menuhtml+="	method='get'";
+	menuhtml+="	name=\"myForm\" autocomplete=\"on\">";
+// <!-- 		encType="multipart/form-data"> //for post not for get-->
+	menuhtml+="	<div class=\"center\">";
+	menuhtml+="		User: <input type=\"text\" name=\"user\" id=\"user\" value=\"\"><br>";
+	menuhtml+="		Password: <input type=\"password\" name=\"password\" id=\"password\" value=\"\" autocomplete=\"off\"> <br>";
+	menuhtml+="		<input type=\"hidden\" name=\"pretty\" value=\"true\" />";
+	menuhtml+="		<input type=\"submit\" onclick=\" exec_login(document.getElementById('user').value, document.getElementById('password').value); return false;\" value=\"LOGIN\" />";
+	menuhtml+="	</div>";
+	menuhtml+="</form>";
+	menu_login.innerHTML = menuhtml;
+	return true;
+	}else{
+		return false;
+	}
+}
 
 function rm_load_header(){
 	var menu_phantom = document.getElementById("menu_phantom");
@@ -292,8 +355,6 @@ function rm_load_header(){
 	}
 }
 
-
-
 function app_load_header(){
 	var menu_phantom = document.getElementById("menu_phantom");
 	if(menu_phantom){
@@ -316,7 +377,47 @@ function app_load_header(){
 	}
 }
 
+function exec_load_header(){
+	var menu_phantom = document.getElementById("menu_phantom");
+	if(menu_phantom){
+	var menuhtml="<ul class=\"menuphantom\">";
+	menuhtml+="	<li class=\"menuphantom\"><a href=\"exec_list.html\">List of executed APPs</a></li>";
+	menuhtml+="	<li class=\"menuphantom\"><a href=\"exec_new.html\">Register new Execution</a></li>";
+	menuhtml+="	<li class=\"menuphantom\"><a href=\"exec_update.html\">Update an Execution</a></li>";
+	menuhtml+="	<li class=\"menuphantom\"><a href=\"exec_update1.json\">Download JSON example 1</a></li>";
+	menuhtml+="	<li class=\"menuphantom\"><a href=\"exec_update2.json\">Download JSON example 2</a></li>";
+// <!--<li class="menuphantom"><a class="active" href="download_file.html">Download File</a></li>-->
+// <!--<li class="menuphantom"><a href="query_metadata.html">Query metadata</a></li> -->
+	menuhtml+="	<li class=\"phantomlogo\" style=\"float:right\">";
+	menuhtml+="	<img src=\"phantom.gif\" alt=\"PHANTOM\" height=\"32\" style=\"background-color:white;\">";
+	menuhtml+="	</li>";
+	menuhtml+="	<li class=\"menuphantomR\">";
+	menuhtml+="		<p><a onClick=\"app_logout();return false;\" href=\"PleaseEnableJavascript.html\">LogOut</a></p></li>";
+	menuhtml+="</ul>";
+	menu_phantom.innerHTML = menuhtml;
+	}
+}
 
+function repo_load_header(){
+	var menu_phantom = document.getElementById("menu_phantom");
+	if(menu_phantom){
+	var menuhtml="<ul class=\"menuphantom\">";
+	menuhtml+="	<li class=\"menuphantom\"><a href=\"query_metadata.html\">Query metadata (list files)</a></li>";
+	menuhtml+="	<li class=\"menuphantom\"><a href=\"upload_file.html\">Register new file</a></li>";
+	menuhtml+="	<li class=\"menuphantom\"><a href=\"download_file.html\">Download a file</a></li>";
+	menuhtml+="	<li class=\"menuphantom\"><a href=\"download_zip.html\">Download a zip file</a></li>";
+	menuhtml+="	<li class=\"menuphantom\"><a href=\"examplec.json\">Download JSON example</a></li>";
+	
+// 	class="active"
+	menuhtml+="	<li class=\"phantomlogo\" style=\"float:right\">";
+	menuhtml+="	<img src=\"phantom.gif\" alt=\"PHANTOM\" height=\"32\" style=\"background-color:white;\">";
+	menuhtml+="	</li>";
+	menuhtml+="	<li class=\"menuphantomR\">";
+	menuhtml+="		<p><a onClick=\"repo_logout();return false;\" href=\"PleaseEnableJavascript.html\">LogOut</a></p></li>";
+	menuhtml+="</ul>";
+	menu_phantom.innerHTML = menuhtml;
+	}
+}
 
 function load_footer(){
 	var foot_phantom = document.getElementById("foot_phantom");
@@ -329,6 +430,13 @@ function load_footer(){
 	menuhtml+="	</div>";
 	foot_phantom.innerHTML = menuhtml;
 	}
+}
+
+function repo_load_header_footer(){
+	repo_load_header();
+	repo_load_menu_login();
+	load_footer();
+	checktoken();
 }
 
 function rm_load_header_footer(){
@@ -345,6 +453,12 @@ function app_load_header_footer(){
 	checktoken();
 }
 
+function exec_load_header_footer(){
+	exec_load_header();
+	exec_load_menu_login();
+	load_footer();
+	checktoken();
+}
 
 function applogin(user,password){
 	var demoreplaceb = document.getElementById("demoreplaceb");
@@ -370,8 +484,6 @@ function applogin(user,password){
 	return false;
 }
 
-
-
 function rm_login(user,password){
 	var demoreplaceb = document.getElementById("demoreplaceb");
 	var debug_phantom = document.getElementById("debug_phantom");
@@ -392,6 +504,37 @@ function rm_login(user,password){
 			rm_logout();
 // 			checktoken();
 			rm_load_menu_login();
+			if(menu_login) menu_login.style.display = "block";
+			var serverResponse = xhr.responseText;
+			if(menu_phantom) menu_phantom.style.display = "none";
+			if(demoreplaceb) demoreplaceb.innerHTML = "Error: "+ serverResponse;
+			if(debug_phantom) debug_phantom.style.display = "block";
+		}
+	};
+	xhr.send(null);
+	return false;
+}
+
+function repo_login(user,password){
+	var demoreplaceb = document.getElementById("demoreplaceb");
+	var debug_phantom = document.getElementById("debug_phantom");
+	var menu_login = document.getElementById("menu_login");
+	var menu_phantom = document.getElementById("menu_phantom"); //top menu
+	var url=build_repo_path()+"/login?email="+user+"\&pw="+password+"";//?pretty='true'";
+	var xhr = new XMLHttpRequest();
+	xhr.open("GET", url, true);
+	xhr.onreadystatechange = function() {
+		if (xhr.status == 200) {
+			var serverResponse = xhr.responseText;
+			savetoken(serverResponse);
+			checktoken();
+			var menuhtml="<H1 style=\"overflow-wrap:break-word; max-width:80%; word-break:break-all;\"><b>Choose one option from the top menu</b></H1>";
+			if(menu_login) menu_login.innerHTML = menuhtml;
+			if(menu_login) menu_login.style.display = "block";
+		}else{
+			repo_logout();
+// 			checktoken();
+			repo_load_menu_login();
 			if(menu_login) menu_login.style.display = "block";
 			var serverResponse = xhr.responseText;
 			if(menu_phantom) menu_phantom.style.display = "none";
@@ -425,7 +568,6 @@ function exec_login(user,password){
 	xhr.send(null);
 	return false;
 }
-
 
 //_filter_workflw_taskid_experimentid
 function jsontotable(myjson,count,first,level,lastwascoma,mtitle,filtered_fields){
@@ -506,7 +648,6 @@ function jsontotable(myjson,count,first,level,lastwascoma,mtitle,filtered_fields
 		html += "</table></div>\n";
 	return html;
 }//jsontotable
- 
 
 function jsontotable_only_device_names(myjson,count,first,level,lastwascoma,mtitle,fields_toshow){
 	var html ="";
@@ -588,7 +729,6 @@ function jsontotable_only_device_names(myjson,count,first,level,lastwascoma,mtit
 	return html;
 }
 
-
 function jsontohtml(myjson,count,first,level,lastwascoma,filtered_fields){
 	var html ="";
 	var i;
@@ -641,7 +781,6 @@ function jsontohtml(myjson,count,first,level,lastwascoma,filtered_fields){
 	}
 	return html;
 }
- 
 
 function upload_with_token( UploadJSON, url ) {
 	var demoreplaceb = document.getElementById("demoreplaceb");
@@ -669,6 +808,32 @@ function upload_with_token( UploadJSON, url ) {
 		if(demoreplaceb) demoreplaceb.innerHTML = "Sorry, try login again, missing token...";
 		if(debug_phantom) debug_phantom.style.display = "block";
 	}
+	return false;
+}
+
+function request_download(url){
+	var demoreplaceb = document.getElementById("demoreplaceb");
+	var debug_phantom = document.getElementById("debug_phantom");
+	var phantom_operation = document.getElementById("phantom_operation");
+	var xhr = new XMLHttpRequest();
+	console.log("url is "+url);
+	xhr.open("GET", url, true);
+	if(sessionStorage.token !== undefined){
+		if(sessionStorage.token.length>0) {
+			xhr.setRequestHeader("Authorization", "JWT " + sessionStorage.token);
+	}}
+	xhr.addEventListener('load', function() {
+// 	xhr.onreadystatechange = function() {
+		if (xhr.readyState === 4 && xhr.status == 200) {
+			var responseObject = [ xhr.responseText ];
+			var html = responseObject;
+			console.log("html "+html);
+			if (demoreplaceb) demoreplaceb.innerHTML = html; //+responseObject + " status: " +xhr.status;
+			if (debug_phantom) debug_phantom.style.display = "block";
+			if(phantom_operation) phantom_operation.style.display="none";
+		}
+	});
+	xhr.send(null);
 	return false;
 }
 
@@ -776,6 +941,17 @@ function list_results_with_token( mytype ,url,fields_toshow, filtered_fields) {
 	return false;
 }
 
+function download_file_repo(project,filepath, source, filename){
+	var url = build_repo_path() + "/download?project=\""+project+"\"\&source=\""+source+"\"\&filepath=\""+filepath+"\"\&filename=\""+filename+"\"";//?pretty='true'";
+	request_download(url);
+	return false;
+}
+
+function download_metadata_repo(project,filepath, source, filename){
+	var url = build_repo_path() + "/query_metadata?project=\""+project+"\"\&source=\""+source+"\"\&filepath=\""+filepath+"\"\&filename=\""+filename+"\"";//?pretty='true'";
+	request_download(url);
+	return false;
+}
 
 function list_apps(mytype,appname){
 	var url = build_appman_path() + "/get_app_list?project=\""+appname+"\"";//?pretty='true'";
@@ -802,7 +978,7 @@ function list_status_devices(mytype,devicename){
 	return false;
 }
 
-function list_mf_config_devices(mytype,devicename){ 
+function list_mf_config_devices(mytype,devicename){
 	// get_plugin_status localhost 9400 "node01";
 	var url=build_resource_path()+"/query_device_mf_config?device=\""+devicename+"\"";//?pretty='true'"; 
 	list_results_with_token(mytype,url,["platform_id"],["_length"] );

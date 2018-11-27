@@ -25,30 +25,27 @@
 	<div id="menu_login" style="display:none"></div>
 
 	<div id="phantom_operation">
-		<h1 id="title_login" style="overflow-wrap:break-word; max-width:80%; word-break:break-all; ">
+		<h1 id="title_login" style="overflow-wrap:break-word; max-width:80%; word-break:break-all;">
 		<b>Register an APP</b></h1>
 
-		<hr><br>
-		<h2><b> Online formular: </b></h2>
+		<hr> <h2><b> Online formular: </b></h2>
 
 		<form ref='uploadForm'
 			id='uploadForm'
 			name="myForm" >
 			&emsp; Json File (REQUIRED) <input type="file" name="UploadJSON" id="UploadJSON"/><br>
 			<div class="center">
-			<input type="submit" onclick="return upload_app_with_token( document.getElementById('UploadJSON') )" value="Register APP" /> 
-			</div> 
+				<input type="submit" onclick="return upload_app_with_token( document.getElementById('UploadJSON') )" value="Register APP"/>
+			</div>
 		</form>
 
-		<hr><br><h2><b> CAUTION:<b></h2>
+		<hr><h2><b> CAUTION:<b></h2>
 		<ul style="list-style-type:disc"> 
-			<li> Field names in the json must be lower-case </li><br>
+			<li> Field names in the json must be lower-case</li>
 		</ul>
 	</div>
 
-	<div id="debug_phantom">
-		<hr><p id="demoreplaceb"></p>
-	</div>
+	<div id="debug_phantom"> <hr><p id="demoreplaceb"></p> </div>
 
 	<div id="foot_phantom"></div>
 	<script> app_load_header_footer(); </script>
