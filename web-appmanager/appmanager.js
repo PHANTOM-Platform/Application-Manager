@@ -19,6 +19,12 @@
 // var reposerver = appserver;
 // var repoport = 8000;
 
+//ABOUT XHR CROSS DOMAIN REQUESTS
+// Note that an XMLHttpRequest connection is subject to specific limits that are enforced for security reasons.
+// One of the most obvious is the enforcement of the same origin policy.
+// You cannot access resources on another server, unless the server explicitly supports this using CORS (Cross Origin Resource Sharing).
+
+
 // var s = 'a string', array for [], object for {}
 function getType(p) {
 	if (Array.isArray(p)) return 'array';
@@ -334,9 +340,7 @@ function rm_load_header(){
 	menuhtml+="	<li class=\"menuphantom\"><a href=\"device_update.html\">Update a DEVICE with a JSON file</a></li>";
 	menuhtml+="	<li class=\"menuphantom\"><a href=\"device_update_form.html\">Register a DEVICE with a Form</a></li>";
 // 	menuhtml+="	<li class=\"menuphantom\"><a href=\"device_update1.json\">Download JSON example</a></li>";
-// 	menuhtml+="	<li class=\"menuphantom\"><a href=\"device_update2.json\">Download JSON example 2</a></li>";
 // <!-- <li class="menuphantom"><a class="active" href="download_file.html">Download File</a></li> -->
-// <!-- <li class="menuphantom"><a href="query_metadata.html">Query metadata</a></li> -->
 	menuhtml+="	<li class=\"phantomlogo\" style=\"float:right\">";
 	menuhtml+="	<img src=\"phantom.gif\" alt=\"PHANTOM\" height=\"32\" style=\"background-color:white;\"></img>";
 	menuhtml+="	</li>";
@@ -365,7 +369,6 @@ function app_load_header(){
 	menuhtml+="	<li class=\"menuphantom\"><a href=\"app_update1.json\">Download JSON example 1</a></li>";
 	menuhtml+="	<li class=\"menuphantom\"><a href=\"app_update2.json\">Download JSON example 2</a></li>";
 	menuhtml+="	<li class=\"menuphantom\"><a href=\"app_update3.json\">Download JSON example 3</a></li>";
-// <!--<li class="menuphantom"><a class="active" href="download_file.html">Download File</a></li>-->
 // <!--<li class="menuphantom"><a href="query_metadata.html">Query metadata</a></li> -->
 	menuhtml+="	<li class=\"phantomlogo\" style=\"float:right\">";
 	menuhtml+="	<img src=\"phantom.gif\" alt=\"PHANTOM\" height=\"32\" style=\"background-color:white;\">";
@@ -386,7 +389,6 @@ function exec_load_header(){
 	menuhtml+="	<li class=\"menuphantom\"><a href=\"exec_update.html\">Update an Execution</a></li>";
 	menuhtml+="	<li class=\"menuphantom\"><a href=\"exec_update1.json\">Download JSON example 1</a></li>";
 	menuhtml+="	<li class=\"menuphantom\"><a href=\"exec_update2.json\">Download JSON example 2</a></li>";
-// <!--<li class="menuphantom"><a class="active" href="download_file.html">Download File</a></li>-->
 // <!--<li class="menuphantom"><a href="query_metadata.html">Query metadata</a></li> -->
 	menuhtml+="	<li class=\"phantomlogo\" style=\"float:right\">";
 	menuhtml+="	<img src=\"phantom.gif\" alt=\"PHANTOM\" height=\"32\" style=\"background-color:white;\">";
@@ -402,7 +404,8 @@ function repo_load_header(){
 	var menu_phantom = document.getElementById("menu_phantom");
 	if(menu_phantom){
 	var menuhtml="<ul class=\"menuphantom\">";
-	menuhtml+="	<li class=\"menuphantom\"><a href=\"query_metadata.html\">Query metadata (list files)</a></li>";
+	menuhtml+="	<li class=\"menuphantom\"><a href=\"query_metadata.html\">Query metadata</a></li>";
+	menuhtml+="	<li class=\"menuphantom\"><a href=\"file_list.html\">List files</a></li>";
 	menuhtml+="	<li class=\"menuphantom\"><a href=\"upload_file.html\">Register new file</a></li>";
 	menuhtml+="	<li class=\"menuphantom\"><a href=\"download_file.html\">Download a file</a></li>";
 	menuhtml+="	<li class=\"menuphantom\"><a href=\"download_zip.html\">Download a zip file</a></li>";
@@ -473,7 +476,7 @@ function applogin(user,password){
 			checktoken();
 		}else{
 			var serverResponse = xhr.responseText;
-			if(demoreplaceb) demoreplaceb.innerHTML = "Error: "+ serverResponse;
+			if(demoreplaceb) demoreplaceb.innerHTML = "<pre>Error: "+ serverResponse+ "</pre>";
 			console.log("Error: "+ serverResponse);
 			if(debug_phantom) debug_phantom.style.display = "block";
 			app_logout();
@@ -507,7 +510,7 @@ function rm_login(user,password){
 			if(menu_login) menu_login.style.display = "block";
 			var serverResponse = xhr.responseText;
 			if(menu_phantom) menu_phantom.style.display = "none";
-			if(demoreplaceb) demoreplaceb.innerHTML = "Error: "+ serverResponse;
+			if(demoreplaceb) demoreplaceb.innerHTML = "<pre>Error: "+ serverResponse+ "</pre>";
 			if(debug_phantom) debug_phantom.style.display = "block";
 		}
 	};
@@ -538,7 +541,7 @@ function repo_login(user,password){
 			if(menu_login) menu_login.style.display = "block";
 			var serverResponse = xhr.responseText;
 			if(menu_phantom) menu_phantom.style.display = "none";
-			if(demoreplaceb) demoreplaceb.innerHTML = "Error: "+ serverResponse;
+			if(demoreplaceb) demoreplaceb.innerHTML = "<pre>Error: "+ serverResponse+ "</pre>";
 			if(debug_phantom) debug_phantom.style.display = "block";
 		}
 	};
@@ -559,7 +562,7 @@ function exec_login(user,password){
 			checktoken();
 		}else{
 			var serverResponse = xhr.responseText;
-			if(demoreplaceb) demoreplaceb.innerHTML = "Error: "+ serverResponse;
+			if(demoreplaceb) demoreplaceb.innerHTML = "<pre>Error: "+ serverResponse+ "</pre>";
 			if(debug_phantom) debug_phantom.style.display = "block";
 			exec_logout();
 			checktoken();
@@ -798,7 +801,7 @@ function upload_with_token( UploadJSON, url ) {
 		xhr.setRequestHeader("Authorization", "JWT " + sessionStorage.token);
 		xhr.addEventListener('load', function() {
 			var responseObject = (xhr.responseText);
-			if(demoreplaceb) demoreplaceb.innerHTML = responseObject + " status: " +xhr.status;
+			if(demoreplaceb) demoreplaceb.innerHTML = "<pre>"+ responseObject + " status: " +xhr.status+ "</pre>";
 			if(debug_phantom) debug_phantom.style.display = "block";
 		});
 		formData.append("UploadJSON", UploadJSON.files[0]);
@@ -811,13 +814,85 @@ function upload_with_token( UploadJSON, url ) {
 	return false;
 }
 
-function request_download(url){
+
+function str2bytes (str) {
+   var bytes = new Uint8Array(str.length);
+   for (var i=0; i<str.length; i++) {
+      bytes[i] = str.charCodeAt(i);
+    }
+    return bytes;
+}
+
+function ab2str(buf) {
+  return String.fromCharCode.apply(null, new Uint16Array(buf));
+}
+function str2ab(str) {
+  var buf = new ArrayBuffer(str.length*2); // 2 bytes for each char
+  var bufView = new Uint16Array(buf);
+  for (var i=0, strLen=str.length; i < strLen; i++) {
+    bufView[i] = str.charCodeAt(i);
+  }
+  return buf;
+}
+
+
+function download_file(content, fileName, contentType) {
+// 	var file = new Blob([str2bytes(content)], {type: contentType});
+	var file = new Blob([content], {type: contentType});
+// 	if (navigator.msSaveOrOpenBlob) {
+// 		navigator.msSaveOrOpenBlob(file, filename);
+// 	} else {
+		var a = document.createElement("a");
+		document.body.appendChild(a);
+		var url = URL.createObjectURL(file);
+		a.style = "display:none";
+		a.href = url;
+		a.download = fileName;
+		a.click();
+// 		URL.revokeObjectURL(url);
+		a.remove();
+	// 	saveAs(file, fileName);
+// 	}
+}
+
+
+function request_downloadzip(url, outputfile, type){
 	var demoreplaceb = document.getElementById("demoreplaceb");
 	var debug_phantom = document.getElementById("debug_phantom");
 	var phantom_operation = document.getElementById("phantom_operation");
 	var xhr = new XMLHttpRequest();
 	console.log("url is "+url);
 	xhr.open("GET", url, true);
+	xhr.processData= false;
+	xhr.setRequestHeader("Content-Type", type);
+	if(sessionStorage.token !== undefined){
+		if(sessionStorage.token.length>0) {
+			xhr.setRequestHeader("Authorization", "JWT " + sessionStorage.token);
+	}}
+	xhr.responseType = 'arraybuffer';
+	xhr.addEventListener('load', function() {
+		if (xhr.readyState === 4 && xhr.status == 200) {
+// 			var responseObject = [ xhr.response ];
+			if(outputfile.length>0)
+				download_file(xhr.response, outputfile, type);
+			if (demoreplaceb) demoreplaceb.innerHTML = "Downloaded file."; //+responseObject + " status: " +xhr.status;
+			if (debug_phantom) debug_phantom.style.display = "block";
+			if(phantom_operation) phantom_operation.style.display="none";
+		}
+	});
+	xhr.send(null);
+	return false;
+}
+
+function request_download(url, outputfile, type){
+	var demoreplaceb = document.getElementById("demoreplaceb");
+	var debug_phantom = document.getElementById("debug_phantom");
+	var phantom_operation = document.getElementById("phantom_operation");
+	var xhr = new XMLHttpRequest();
+	console.log("url is "+url);
+	xhr.open("GET", url, true);
+	xhr.processData= false;	
+	xhr.setRequestHeader("Content-Type", type);
 	if(sessionStorage.token !== undefined){
 		if(sessionStorage.token.length>0) {
 			xhr.setRequestHeader("Authorization", "JWT " + sessionStorage.token);
@@ -826,11 +901,14 @@ function request_download(url){
 // 	xhr.onreadystatechange = function() {
 		if (xhr.readyState === 4 && xhr.status == 200) {
 			var responseObject = [ xhr.responseText ];
-			var html = responseObject;
-			console.log("html "+html);
-			if (demoreplaceb) demoreplaceb.innerHTML = html; //+responseObject + " status: " +xhr.status;
+			if(outputfile.length>0)
+				download_file(xhr.response, outputfile, type);
+			if (demoreplaceb) demoreplaceb.innerHTML = "<pre>" + responseObject+ "</pre>"; // + " status: " +xhr.status;
 			if (debug_phantom) debug_phantom.style.display = "block";
 			if(phantom_operation) phantom_operation.style.display="none";
+		}else{
+			if (demoreplaceb) demoreplaceb.innerHTML = "<pre>"+responseObject + " status: " +xhr.status + "</pre>";
+			if (debug_phantom) debug_phantom.style.display = "block";
 		}
 	});
 	xhr.send(null);
@@ -867,10 +945,10 @@ function list_results(mytype,url,fields_toshow,filtered_fields){
 				}else if (mytype == 2){
 					html += jsontohtml(myjson,1,true,1,false,filtered_fields);
 				}else{
-					html += JSON.stringify(myjson);
+					html += "<pre>"+ JSON.stringify(myjson)+ "</pre>";
 				}
 			}
-			if (demoreplaceb) demoreplaceb.innerHTML = html; //+responseObject + " status: " +xhr.status;
+			if (demoreplaceb) demoreplaceb.innerHTML =  html; //+responseObject + " status: " +xhr.status;
 			if (debug_phantom) debug_phantom.style.display = "block";
 			//demoreplaceb.innerHTML = JSON.stringify(myjson) + "<br>" + html;// myjson[0].project;
 		}
@@ -941,17 +1019,6 @@ function list_results_with_token( mytype ,url,fields_toshow, filtered_fields) {
 	return false;
 }
 
-function download_file_repo(project,filepath, source, filename){
-	var url = build_repo_path() + "/download?project=\""+project+"\"\&source=\""+source+"\"\&filepath=\""+filepath+"\"\&filename=\""+filename+"\"";//?pretty='true'";
-	request_download(url);
-	return false;
-}
-
-function download_metadata_repo(project,filepath, source, filename){
-	var url = build_repo_path() + "/query_metadata?project=\""+project+"\"\&source=\""+source+"\"\&filepath=\""+filepath+"\"\&filename=\""+filename+"\"";//?pretty='true'";
-	request_download(url);
-	return false;
-}
 
 function list_apps(mytype,appname){
 	var url = build_appman_path() + "/get_app_list?project=\""+appname+"\"";//?pretty='true'";
@@ -980,7 +1047,120 @@ function list_status_devices(mytype,devicename){
 
 function list_mf_config_devices(mytype,devicename){
 	// get_plugin_status localhost 9400 "node01";
-	var url=build_resource_path()+"/query_device_mf_config?device=\""+devicename+"\"";//?pretty='true'"; 
+	var url=build_resource_path()+"/query_device_mf_config?device=\""+devicename+"\"";//?pretty='true'";
 	list_results_with_token(mytype,url,["platform_id"],["_length"] );
+	return false;
+}
+
+/**
+ * @return a file with the server response if a outputfilename is provided
+ * */
+function submitform(url, operation, outputfile) {
+	var demoreplaceb = document.getElementById("demoreplaceb");
+	var debug_phantom = document.getElementById("debug_phantom");
+	var phantom_operation = document.getElementById("phantom_operation");
+	if((sessionStorage.token !== undefined) && (sessionStorage.token.length>0)) {
+		var xhr = new XMLHttpRequest();
+		xhr.open(operation, url, true);
+		xhr.setRequestHeader("Authorization", "JWT " + sessionStorage.token);
+		xhr.setRequestHeader('X-Requested-With','XMLHttpRequest');
+//		xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8'); mal
+		xhr.addEventListener('load', function() {
+			if (xhr.readyState == 4) {
+				var r = "";
+				if (xhr.status == 200 || xhr.status == 0) {
+					if(outputfile.length>0)
+						download_file(xhr.responseText, outputfile , 'text/plain');
+					r = "Server response:<br/><br/>"+xhr.responseText+"<br/>";
+				} else {
+					r = "Error " + xhr.status + " occurred requesting for Metatada.<br/>";
+				}
+				if(demoreplaceb) document.getElementById("demoreplaceb").innerHTML = "<pre>"+r+"</pre>";
+				if(debug_phantom) document.getElementById("debug_phantom").style.display = "block";
+				if(phantom_operation) document.getElementById("phantom_operation").style.display = "none";
+			}
+		});
+		xhr.send(null);//may fault code appear here
+	}else {
+		if(demoreplaceb) demoreplaceb.innerHTML = "Sorry, try login again, missing token...";
+		if(debug_phantom) debug_phantom.style.display = "block";
+	}
+	return false;
+}
+
+function submitform_qr_metatada(e, frm) {
+	var filepath = document.getElementById("Path").value;
+	var filename = document.getElementById("filename").value;
+	var project= document.getElementById("project").value;
+	var source = document.getElementById("source").value;
+	var url = "query_metadata?project=" + project + "&source=" + source + "&filepath=" + filepath + "&filename=" + filename;
+	submitform(url, 'GET', 'metadata.json');
+	return false;
+}
+
+function submitform_qr_metatada_es(e, frm) {
+	var QueryBody = document.getElementById("QueryBody").value;
+	var url = "es_query_metadata?QueryBody=" + QueryBody;
+	submitform(url, 'GET', 'metadata.json');
+	return false;
+}
+
+
+function submitform_file_list(project, source,filepath){
+	if(project == undefined){
+		return false;
+	}else if(project.length==0){
+		return false;
+	}
+	var url = build_repo_path() + "/downloadlist?project=\""+project+"\"";
+	if(source !== undefined){
+		if(source.length>0) {
+			url +="\&source=\""+source+"\"";
+			if(filepath !== undefined){
+				if(filepath.length>0) {
+					url +="\&filepath=\""+filepath+"\"";
+				}
+			}
+		}
+	}
+	submitform(url, 'GET', '');
+	return false;
+}
+
+function download_file_repo(project, source,filepath, filename){
+	var url = build_repo_path() + "/download?project=\""+project+"\"\&source=\""+source+"\"\&filepath=\""+filepath+"\"\&filename=\""+filename+"\"";//?pretty='true'";
+	request_download(url, "", 'text/plain');
+	return false;
+}
+
+function download_metadata_repo(project,source,filepath,  filename){
+	var url = build_repo_path() + "/query_metadata?project=\""+project+"\"\&source=\""+source+"\"\&filepath=\""+filepath+"\"\&filename=\""+filename+"\"";//?pretty='true'";
+	request_download(url, "", 'text/plain');
+	return false;
+}
+
+function downloadzip_file_repo(project, source, filepath, filename){
+	if(project == undefined){
+		return false;
+	}else if(project.length==0){
+		return false;
+	}
+	var url = build_repo_path() + "/downloadzip?project=\""+project+"\"";
+	if(source !== undefined){
+		if(source.length>0) {
+			url +="\&source=\""+source+"\"";
+			if(filepath !== undefined){
+				if(filepath.length>0) {
+					url +="\&filepath=\""+filepath+"\"";
+					if(filename !== undefined){
+						if(filename.length>0) {
+							url +="\&filename=\""+filename+"\"";
+						}
+					}
+				}
+			}
+		}
+	}
+	request_downloadzip(url, "output.zip", "application/zip");
 	return false;
 }
