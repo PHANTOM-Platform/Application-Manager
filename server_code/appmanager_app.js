@@ -364,16 +364,22 @@ function consolelogjson(JSONstring ){
 //*********************************************************************	
 //the purpose is to remove the fields/properties path,path_length, filename,filename_length, if present.
 //and generate thos fields/properties from the input parameters
-function update_filename_path_on_json(JSONstring, filename, path){
+function update_filename_path_on_json(JSONstring, project,source, filename, path){
 	var new_json = {  }
 	var jsonobj = JSON.parse(JSONstring);
 	var keys = Object.keys(jsonobj);
+	if (project == undefined) project="";
+	if (source == undefined) source="";
 	if (path == undefined) path="";
-	if (filename == undefined) filename="";	
+	if (filename == undefined) filename="";
+	new_json['project']		=project;
+	new_json['project'+'_length']		=project.length;
+	new_json['source']		=source;
+	new_json['source'+'_length']		=source.length;	
 	new_json['path']		=path;
 	new_json['path'+'_length']	=path.length; //label can not contain points '.' !
 	new_json['filename']	=filename;
-	new_json['filename'+'_length']=filename.length;	
+	new_json['filename'+'_length']=filename.length;
 	for (var i = 0; i < keys.length; i++) {
 		var label=Object.getOwnPropertyNames(jsonobj)[i];
 		label=lowercase(label);
