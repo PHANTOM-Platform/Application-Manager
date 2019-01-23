@@ -259,8 +259,8 @@ const logsmapping = {
 	var expressWs 		= require('express-ws')(app);
 	var app = expressWs.app;
 //*******************************************************************
-//********************  VARIABLES FOR WSockets **********************
-	//*** STORAGE OF USERS
+//******************** VARIABLES FOR WSockets **********************
+//*** STORAGE OF USERS
 	const max_users=50;
 	var totalusers=0;
 	var user_ids = new Array(max_users );
@@ -273,9 +273,9 @@ const logsmapping = {
 	const max_projects= 100;
 	const max_mensages=40;
 	var totalmensages= [max_projects];
-	for (var i = 0; i < max_projects; i++) 
+	for (var i = 0; i < max_projects; i++)
 		totalmensages[i]=0;
-	var ProjectContents = new Array(max_projects,max_mensages); //10 projects,  stack of max_mensages contents
+	var ProjectContents = new Array(max_projects,max_mensages); //10 projects, stack of max_mensages contents
 	
 //*** STORAGE OF SUSCRIPTIONS
 	const max_suscrip=6;
@@ -296,7 +296,6 @@ const logsmapping = {
 	var ExecSubscriptions = new Array(max_users,max_suscrip); //stack of "max_suscrip" proj suscr for each user
 
 	var clients = [ ];// list of currently connected clients (users)
-
 //****************************************************
 //**********************************************************
 //This function removes double quotation marks if present at the beginning and the end of the input string
@@ -307,14 +306,13 @@ function remove_quotation_marks(input_string){
 	}
 	if(input_string.length>0){
 	if(input_string.charAt(input_string.length-1) === '"') {
-		input_string = input_string.substring(0, input_string.length - 1); 
+		input_string = input_string.substring(0, input_string.length - 1);
 	}}}
 	return (input_string);
-}	
-
+}
 
 function lowercase(input_string){
-	var result=""; 
+	var result="";
 	for (var j = 0; j < input_string.length; j++) {
 // 		input_string.replaceAt(j, character.toLowerCase());
         var charCode = input_string.charCodeAt(j);
@@ -327,9 +325,9 @@ function lowercase(input_string){
             // Append the lowercase character
             result += String.fromCharCode(charCode + 32);
         }
-	} 
+	}
 	return (result);
-}	
+}
 
 function is_defined(variable) {
 	return (typeof variable !== 'undefined');
@@ -372,39 +370,54 @@ function update_filename_path_on_json(JSONstring, project,source, filename, path
 	if (source == undefined) source="";
 	if (path == undefined) path="";
 	if (filename == undefined) filename="";
-	new_json['project']		=project;
-	new_json['project'+'_length']		=project.length;
-	new_json['source']		=source;
-	new_json['source'+'_length']		=source.length;	
-	new_json['path']		=path;
-	new_json['path'+'_length']	=path.length; //label can not contain points '.' !
-	new_json['filename']	=filename;
+	new_json['project']=project;
+	new_json['project'+'_length']=project.length;
+	new_json['source']=source;
+	new_json['source'+'_length']=source.length;
+	new_json['path']=path;
+	new_json['path'+'_length']=path.length; //label can not contain points '.' !
+	new_json['filename']=filename;
 	new_json['filename'+'_length']=filename.length;
 	for (var i = 0; i < keys.length; i++) {
 		var label=Object.getOwnPropertyNames(jsonobj)[i];
 		label=lowercase(label);
 		if((label != 'path') && (label != 'filename') && (label != 'path_length') && (label != 'filename_length'))
-			new_json[label]=jsonobj[keys[i]];	//add one property
+			new_json[label]=jsonobj[keys[i]]; //add one property
 		if( typeof jsonobj[keys[i]] == 'string'){
 			new_json[label+'_length']=jsonobj[keys[i]].length;
 		}
-	} 
+	}
 	new_json=(JSON.stringify(new_json));
 	return new_json;
 }
 
-function update_device_length_on_json(JSONstring, device){ 
-	var new_json = {  } 
+
+function find_id(JSONstring){
+	var response = "";
+	var jsonobj = JSON.parse(JSONstring);
+	var keys = Object.keys(jsonobj);
+	var found_id=0;
+	for (var i = 0; i < keys.length; i++) {
+		var label=Object.getOwnPropertyNames(jsonobj)[i];
+		label=lowercase(label);
+		if(label == '_id')
+			response = jsonobj[keys[i]];
+	}
+	return response;
+}
+
+function update_device_length_on_json(JSONstring, device){
+	var new_json = {  }
 	var jsonobj = JSON.parse(JSONstring);
 	var keys = Object.keys(jsonobj);
 	if (device == undefined) device="";
-	new_json['device']		=device;
-	new_json['device_length']	=device.length; 	
+	new_json['device']=device;
+	new_json['device_length']=device.length;
 	for (var i = 0; i < keys.length; i++) {
 		var label=Object.getOwnPropertyNames(jsonobj)[i];
 		label=lowercase(label);
 		if((label != 'device') && (label != 'device_length'))
-		new_json[label]=jsonobj[keys[i]];	//add one property
+		new_json[label]=jsonobj[keys[i]]; //add one property
 		if( typeof jsonobj[keys[i]] == 'string'){
 			new_json[label+'_length']=jsonobj[keys[i]].length;
 		}
@@ -418,13 +431,13 @@ function update_app_length_on_json(JSONstring, appname){
 	var jsonobj = JSON.parse(JSONstring);
 	var keys = Object.keys(jsonobj);
 	if (appname== undefined) appname="";
-	new_json['app']		=appname;
-	new_json['app_length']	=appname.length;
+	new_json['app']=appname;
+	new_json['app_length']=appname.length;
 	for (var i = 0; i < keys.length; i++) {
 		var label=Object.getOwnPropertyNames(jsonobj)[i];
 		label=lowercase(label);
 		if((label != 'app') && (label != 'app_length'))
-		new_json[label]=jsonobj[keys[i]];	//add one property
+		new_json[label]=jsonobj[keys[i]]; //add one property
 		if( typeof jsonobj[keys[i]] == 'string'){
 			new_json[label+'_length']=jsonobj[keys[i]].length;
 		}
@@ -432,6 +445,27 @@ function update_app_length_on_json(JSONstring, appname){
 	new_json=(JSON.stringify(new_json));
 	return new_json;
 }
+
+function update_execution_id_length_on_json(JSONstring, exec_id){
+	var new_json = {  }
+	var jsonobj = JSON.parse(JSONstring);
+	var keys = Object.keys(jsonobj);
+	if (exec_id== undefined) exec_id="";
+	for (var i = 0; i < keys.length; i++) {
+		var label=Object.getOwnPropertyNames(jsonobj)[i];
+		label=lowercase(label);
+		if((label != 'execution_id') && (label != 'execution_id_length'))
+		new_json[label]=jsonobj[keys[i]]; //add one property
+		if( typeof jsonobj[keys[i]] == 'string'){
+			new_json[label+'_length']=jsonobj[keys[i]].length;
+		}
+	}
+	new_json['execution_id'] =exec_id;
+	new_json['execution_id_length'] =exec_id.length;
+	new_json=(JSON.stringify(new_json));
+	return new_json;
+}
+
 
 function get_source_project_json(JSONstring){
 	var myres = { source: "", project: "" };
@@ -444,7 +478,7 @@ function get_source_project_json(JSONstring){
 			myres.source=jsonobj[keys[i]];
 		if(label == 'project')
 			myres.project=jsonobj[keys[i]];
-	} 
+	}
 	return myres;
 }
 //*********************************************************************	
@@ -452,11 +486,11 @@ function get_source_project_json(JSONstring){
 // 	var Employee = {
 // 		firstname: "Pedro",
 // 		lastname: "Picapiedra"
-// 	} 
+// 	}
 // 	console.log(Employee);
 // 	delete Employee.firstname; //delete one property
 // 	var label='age';
-// 	Employee[label]="32";		//add one property
+// 	Employee[label]="32"; //add one property
 // 	console.log(Employee);
 // }
 //*********************************************************************
@@ -477,7 +511,6 @@ function get_value_json(JSONstring,label){
 	return (myres);
 }
 
-
 function update_projectname_length_on_json(JSONstring, projectname){
 	var new_json = {  }
 	var jsonobj = JSON.parse(JSONstring);
@@ -489,7 +522,7 @@ function update_projectname_length_on_json(JSONstring, projectname){
 		var label=Object.getOwnPropertyNames(jsonobj)[i];
 		label=lowercase(label);
 		if((label != 'project') && (label != 'project_length'))
-		new_json[label]=jsonobj[keys[i]];	//add one property
+		new_json[label]=jsonobj[keys[i]]; //add one property
 		if( typeof jsonobj[keys[i]] == 'string'){
 			new_json[label+'_length']=jsonobj[keys[i]].length;
 		}
@@ -499,13 +532,13 @@ function update_projectname_length_on_json(JSONstring, projectname){
 }
 //**********************************************************
 function validate_parameter(parameter,label,currentdate,user,address){
-	var message_error = "DOWNLOAD Bad Request missing "+label;  
-	if (parameter != undefined){  
+	var message_error = "Bad Request missing "+label;
+	if (parameter != undefined){
 		parameter = remove_quotation_marks(parameter);
 		if (parameter.length > 0)
 			return(parameter);
 	}
-	resultlog = LogsModule.register_log(es_servername+":"+es_port,SERVERDB,400,address,message_error,currentdate, user );
+	resultlog = LogsModule.register_log(es_servername+":"+es_port,SERVERDB,400,address,message_error,currentdate, user);
 	return undefined;
 }
 
@@ -518,7 +551,7 @@ function retrieve_file(filePath,res){
 	switch (extname) {
 		case '.html':
 			contentType = 'text/html';
-			break;			
+			break;
 		case '.js':
 			contentType = 'text/javascript';
 			break;
@@ -548,7 +581,7 @@ function retrieve_file(filePath,res){
 			} else {
 				res.writeHead(500);
 				res.end('Sorry, check with the site admin for error: '+error.code+' ..\n');
-				res.end(); 
+				res.end();
 			}
 		} else {
 			res.writeHead(200, { 'Content-Type': contentType });
@@ -560,11 +593,11 @@ function retrieve_file(filePath,res){
 var middleware = require('./token-middleware');
 
 // Access to private content only if autenticated, using an authorization token
-app.get('/verifytoken',middleware.ensureAuthenticated, function(req, res) { 
-// 	console.log("   " +colours.FgYellow + colours.Bright + " request from IP:" + req.connection.remoteAddress + colours.Reset); 
-		var message = "The token is valid !!!.\n"
-			res.writeHead(200, { 'Content-Type': 'text/plain' });
-			res.end(message, 'utf-8');
+app.get('/verifytoken',middleware.ensureAuthenticated, function(req, res) {
+// 	console.log("   " +colours.FgYellow + colours.Bright + " request from IP:" + req.connection.remoteAddress + colours.Reset);
+	var message = "The token is valid !!!.\n"
+	res.writeHead(200, { 'Content-Type': 'text/plain' });
+	res.end(message, 'utf-8');
 } );
 //********************************************************** 
 app.use(bodyParser.json());
@@ -693,8 +726,8 @@ app.get('/query_metadata.html', function(req, res) {
 // Path only accesible when Authenticated
 app.get('/private',middleware.ensureAuthenticated, function(req, res) {
 	var message = "\n\nAccess to restricted content !!!.\n\n"
-		res.writeHead(200, { 'Content-Type': contentType_text_plain});
-		res.end(message, 'utf-8');
+	res.writeHead(200, { 'Content-Type': contentType_text_plain});
+	res.end(message, 'utf-8');
 });
 //**********************************************************
 app.get('/verify_es_connection', function(req, res) {
@@ -712,7 +745,7 @@ app.get('/verify_es_connection', function(req, res) {
 //**********************************************************
 app.get('/drop_db', function(req, res) {
 	"use strict";
-	var resultlog ;
+	var resultlog;
 	var currentdate = dateFormat(new Date(), "yyyy-mm-dd'T'HH:MM:ss.l");
 	console.log("\n[LOG]: Deleting Database");
 	console.log("   " +colours.FgYellow + colours.Bright + " request from IP:" + req.connection.remoteAddress + colours.Reset);
@@ -722,76 +755,77 @@ app.get('/drop_db', function(req, res) {
 		res.end("\n403: FORBIDDEN access from external IP.\n");
 		var messagea = "Deleting Database FORBIDDEN access from external IP.";
 		resultlog = LogsModule.register_log(es_servername+":"+es_port,SERVERDB, 403,req.connection.remoteAddress,messagea,currentdate,"");
-		return ;
+		return;
 	}
-	var searching = MetadataModule.drop_db(es_servername+":"+es_port, SERVERDB );
-	searching.then((resultFind) => { 
+	var searching = MetadataModule.drop_db(es_servername+":"+es_port, SERVERDB);
+	searching.then((resultFind) => {
 		res.writeHead(200, {"Content-Type": contentType_text_plain});
-		res.end("200: "+resultFind+"\n"); 
+		res.end("200: "+resultFind+"\n");
 		//not register log here, because we can not register nothing after delete the DB !!!
 	},(resultReject)=> {
 // 		console.log("log: Bad Request: " + resultReject); 
 		res.writeHead(400, {"Content-Type": contentType_text_plain});
-		res.end("\n400: Bad Request "+resultReject+"\n"); 
+		res.end("\n400: Bad Request "+resultReject+"\n");
 		//not register log here, because the error can be due not existing DB to be drop.
 	} );
 });
+
 //this function registers a list of mappings with a recursive set of promises
 function register_next_mapping (arr_labels, arr_mappings, es_servername, es_port){
 	return new Promise( (resolve,reject) => {
-		var create_new_map = MetadataModule.new_mapping(es_servername+":"+es_port,SERVERDB, arr_labels[0], arr_mappings[0] );
+		var create_new_map = MetadataModule.new_mapping(es_servername+":"+es_port,SERVERDB, arr_labels[0], arr_mappings[0]);
 		create_new_map.then((resultFind) => {
 			arr_labels.shift(); //removes the first element of the array
 			arr_mappings.shift(); //removes the first element of the array
 			var next_result;
 			if(arr_labels.length >0 ){
-				next_result= register_next_mapping (arr_labels, arr_mappings, es_servername, es_port );
+				next_result= register_next_mapping (arr_labels, arr_mappings, es_servername, es_port);
 				next_result.then((next_resultFind) => {
 					resolve(next_resultFind);
-				},(next_resultReject)=> { 
+				},(next_resultReject)=> {
 					reject(next_resultReject);
-				} ); 
+				} );
 			}else{
 				resolve(resultFind);
-			} 
-		},(resultReject)=> { 
+			}
+		},(resultReject)=> {
 			reject(resultReject);
-		} ); 
+		});
 	});//end of promise
 };
 //**********************************************************
 app.get('/new_db', function(req, res) {
-	"use strict"; 
+	"use strict";
 	var currentdate = dateFormat(new Date(), "yyyy-mm-dd'T'HH:MM:ss.l");
-	var create_new_db = MetadataModule.new_db(es_servername+":"+es_port,SERVERDB );
+	var create_new_db = MetadataModule.new_db(es_servername+":"+es_port,SERVERDB);
 	create_new_db.then((resultFind) => {
-		var arr_labels = [ 'metadata', 'users', 'tokens', 'logs', 'devices_status', 'devices', 'executions_status' ];
-		var arr_mappings = [ metadatamapping ,usersmapping, tokensmapping, logsmapping, statusmapping, devicemapping, execsmapping ];
-		var create_new_mappings =register_next_mapping (arr_labels, arr_mappings, es_servername, es_port ); 
-		create_new_mappings.then((resultFind_map) => { 
+		var arr_labels = [ 'metadata', 'users', 'tokens', 'logs', 'devices_status', 'devices', 'executions_status'];
+		var arr_mappings = [ metadatamapping ,usersmapping, tokensmapping, logsmapping, statusmapping, devicemapping, execsmapping];
+		var create_new_mappings =register_next_mapping (arr_labels, arr_mappings, es_servername, es_port);
+		create_new_mappings.then((resultFind_map) => {
 			res.writeHead(200, {"Content-Type": "application/json"});
-			res.end(resultFind_map+"\n"); 
+			res.end(resultFind_map+"\n");
 			var resultlog_map = LogsModule.register_log(es_servername+":"+es_port,SERVERDB, 200,req.connection.remoteAddress,"DB successfully created",currentdate,"");
-		},(resultReject_map)=> { 
+		},(resultReject_map)=> {
 			res.writeHead(400, {"Content-Type": contentType_text_plain});
 			res.end("\n400: Bad Request "+resultReject_map+"\n");
 			var resultlogb = LogsModule.register_log(es_servername+":"+es_port,SERVERDB, 400,req.connection.remoteAddress,"Bad Request "+resultReject_map,currentdate,"");
-		} );
-	},(resultReject)=> { 
+		});
+	},(resultReject)=> {
 		res.writeHead(400, {"Content-Type": contentType_text_plain});
 		res.end("\n400: Bad Request when creating DB "+resultReject+"\n");
 		var resultlogc = LogsModule.register_log(es_servername+":"+es_port,SERVERDB, 400,req.connection.remoteAddress,"Bad Request "+resultReject,currentdate,"");
-	} );
+	});
 });
 //**********************************************************
-app.get('/_flush', function(req, res) { 
-	var verify_flush = CommonModule.my_flush(req.connection.remoteAddress ,es_servername+':'+es_port, SERVERDB );
+app.get('/_flush', function(req, res) {
+	var verify_flush = CommonModule.my_flush(req.connection.remoteAddress ,es_servername+':'+es_port, SERVERDB);
 	verify_flush.then((resolve_result) => {
 		res.writeHead(resolve_result.code, {"Content-Type": contentType_text_plain});
 		res.end(resolve_result.text+"\n", 'utf-8');
 	},(reject_result)=> {
-		res.writeHead(reject_result.code, {"Content-Type": contentType_text_plain}); 
-		res.end(reject_result.text+"\n", 'utf-8'); 
+		res.writeHead(reject_result.code, {"Content-Type": contentType_text_plain});
+		res.end(reject_result.text+"\n", 'utf-8');
 	});
 });
 //******************************************************************************
@@ -853,7 +887,7 @@ app.get('/es_query_metadata', middleware.ensureAuthenticated, function(req, res)
 		resultlog = LogsModule.register_log(es_servername+":"+es_port,SERVERDB,400,req.connection.remoteAddress,"ES-QUERY METADATA BAD Request on query:"
 			+JSON.stringify(QueryBody),currentdate,res.user);
 	});
-}); 
+});
 //**********************************************************
 function register_task(req, res,new_task){
 	"use strict";
@@ -1075,30 +1109,30 @@ app.post('/signup', function(req, res) {
 	var name= find_param(req.body.userid, req.query.userid);
 	var email= find_param(req.body.email, req.query.email);
 	var pw=find_param(req.body.pw, req.query.pw);
-	var resultlog ;
+	var resultlog;
 	if (pw == undefined){
 		res.writeHead(400, {"Content-Type": contentType_text_plain});
 		res.end("\n400: SIGNUP Bad Request, missing Passwd.\n");
 		resultlog = LogsModule.register_log(es_servername+":"+es_port,SERVERDB, 400,req.connection.remoteAddress,"SIGNUP Bad Request, missing Passwd",currentdate,"");
-		return ;
+		return;
 	}else if(pw.length == 0){
 		res.writeHead(400, {"Content-Type": contentType_text_plain});
 		res.end("\n400: SIGNUP Bad Request, empty Passwd.\n");
 		resultlog = LogsModule.register_log(es_servername+":"+es_port,SERVERDB, 400,req.connection.remoteAddress,"SIGNUP Bad Request, Empty Passwd",currentdate,"");
-		return ;
+		return;
 	}
 	if (email == undefined){
 		res.writeHead(400, {"Content-Type": contentType_text_plain});
 		res.end("\n400: Bad Request, missing Email.\n");
 		resultlog = LogsModule.register_log( es_servername+":"+es_port,SERVERDB,400,req.connection.remoteAddress,"SIGNUP Bad Request, missing Email",currentdate,"");
-		return ;
+		return;
 	}else if (email.length == 0){
 		res.writeHead(400, {"Content-Type": contentType_text_plain});
 		res.end("\n400: Bad Request, Empty Email.\n");
 		resultlog = LogsModule.register_log( es_servername+":"+es_port,SERVERDB,400,req.connection.remoteAddress,"SIGNUP Bad Request, Empty Email",currentdate,"");
-		return ;
+		return;
 	}
-	console.log("[LOG]: REGISTER USER+PW"); 
+	console.log("[LOG]: REGISTER USER+PW");
 	console.log("   " +colours.FgYellow + colours.Bright + " user: " + colours.Reset + email );
 	console.log("   " +colours.FgYellow + colours.Bright + " request from IP: " + req.connection.remoteAddress + colours.Reset);
 	if(( req.connection.remoteAddress!= ips[0] ) &&( req.connection.remoteAddress!=ips[1])&&( req.connection.remoteAddress!=ips[2])){
@@ -1107,7 +1141,7 @@ app.post('/signup', function(req, res) {
 		resultlog = LogsModule.register_log( es_servername+":"+es_port,SERVERDB,403,req.connection.remoteAddress,messagea,currentdate,"");
 		res.writeHead(403, {"Content-Type": contentType_text_plain});
 		res.end("\n403: FORBIDDEN access from external IP.\n");
-		return ;
+		return;
 	}
 	var result = UsersModule.register_new_user(es_servername+":"+es_port,SERVERDB, name, email, pw);
 	result.then((resultreg) => {
@@ -1139,17 +1173,17 @@ app.post('/update_user', function(req, res) {
 	var currentdate = dateFormat(new Date(), "yyyy-mm-dd'T'HH:MM:ss.l");
 	var name= find_param(req.body.userid, req.query.userid);
 	var email= find_param(req.body.email, req.query.email);
-	var pw=find_param(req.body.pw, req.query.pw); 
-	if (pw == undefined){ 
+	var pw=find_param(req.body.pw, req.query.pw);
+	if (pw == undefined){
 		res.writeHead(400, {"Content-Type": contentType_text_plain});
 		res.end("\n400: SIGNUP Bad Request, missing Email.\n");
 		resultlog = LogsModule.register_log(es_servername+":"+es_port,SERVERDB, 400,req.connection.remoteAddress,"SIGNUP Bad Request, missing Email",currentdate,"");
-		return ;
+		return;
 	}else if (pw.length == 0){
 		res.writeHead(400, {"Content-Type": contentType_text_plain});
 		res.end("\n400: SIGNUP Bad Request, Empty Email.\n");
 		resultlog = LogsModule.register_log(es_servername+":"+es_port,SERVERDB, 400,req.connection.remoteAddress,"SIGNUP Bad Request, Empty Email",currentdate,"");
-		return ;
+		return;
 	}
 	if (email == undefined){
 		res.writeHead(400, {"Content-Type": contentType_text_plain});
@@ -1160,14 +1194,14 @@ app.post('/update_user', function(req, res) {
 		res.writeHead(400, {"Content-Type": contentType_text_plain});
 		res.end("\n400: Bad Request, Empty Email.\n");
 		resultlog = LogsModule.register_log(es_servername+":"+es_port,SERVERDB, 400,req.connection.remoteAddress,"SIGNUP Bad Request, Empty Email",currentdate,"");
-		return ;
+		return;
 	}
 	if(( req.connection.remoteAddress!= ips[0] ) &&( req.connection.remoteAddress!=ips[1])&&( req.connection.remoteAddress!=ips[2])){
 		var messagea = "REGISTER USER '"+ email + "' FORBIDDEN access from external IP";
 		resultlog = LogsModule.register_log(es_servername+":"+es_port,SERVERDB, 403,req.connection.remoteAddress,messagea,currentdate,"");
 		res.writeHead(403, {"Content-Type": contentType_text_plain});
 		res.end("\n403: FORBIDDEN access from external IP.\n");
-		return ;
+		return;
 	}
 	var result = UsersModule.update_user(es_servername+":"+es_port,SERVERDB, name, email, pw);
 	result.then((resultreg) => {
@@ -1186,7 +1220,7 @@ app.post('/update_user', function(req, res) {
 		res.end("updateuser: Bad Request "+resultReject.text+"\n");
 		var messagec = "UPDATE USER '"+ email + "' BAD REQUEST";
 		resultlog = LogsModule.register_log(es_servername+":"+es_port,SERVERDB, resultreg.code, req.connection.remoteAddress, messagec,currentdate,"");
-	} );
+	});
 });
 
 //**********************************************************
@@ -1194,7 +1228,7 @@ app.post('/update_user', function(req, res) {
 // curl -H "Content-Type: text/plain" -XGET http://localhost:8000/login?email="bob"\&pw="1234" --output token.txt
 app.get('/login', function(req, res) {
 	"use strict";
-	var resultlog ;
+	var resultlog;
 	var currentdate = dateFormat(new Date(), "yyyy-mm-dd'T'HH:MM:ss.l"); 
 	var email= find_param(req.body.email, req.query.email);
 	var pw=find_param(req.body.pw, req.query.pw);
@@ -1223,13 +1257,13 @@ app.get('/login', function(req, res) {
 	var result = UsersModule.query_count_user_pw( es_servername+":"+es_port,SERVERDB, email, pw); //returns the count of email-pw, if !=1 then we consider not registered.
 	result.then((resultCount) => {
 		if(resultCount==1){
-			var mytoken= auth.emailLogin(email); 
+			var mytoken= auth.emailLogin(email);
 			res.writeHead(200, {"Content-Type": contentType_text_plain});
 			res.end(mytoken);
 			resultlog = LogsModule.register_log(es_servername+":"+es_port,SERVERDB, 200, req.connection.remoteAddress, "New token Generated",currentdate,"");
 		}else{
 			res.writeHead(401, {"Content-Type": contentType_text_plain});
-			res.end("401 (Unauthorized) Autentication failed, incorrect user " +" or passwd " +"\n"); 
+			res.end("401 (Unauthorized) Autentication failed, incorrect user " +" or passwd " +"\n");
 // 			console.log("resultCount "+resultCount);
 			resultlog = LogsModule.register_log(es_servername+":"+es_port,SERVERDB, 401, req.connection.remoteAddress,
 				"401: Bad Request of Token, incorrect user or passwd "+email+"or passwd ",currentdate,"");
@@ -1238,8 +1272,8 @@ app.get('/login', function(req, res) {
 		res.writeHead(400, {"Content-Type": contentType_text_plain});
 		res.end("\n400: Bad Request "+resultReject+"\n");
 		resultlog = LogsModule.register_log(es_servername+":"+es_port,SERVERDB, 400, req.connection.remoteAddress, 
-				"400: Bad Token Request "+resultReject,currentdate,"");	
-	} );
+				"400: Bad Token Request "+resultReject,currentdate,"");
+	});
 }); // login
 function originIsAllowed(origin) {
 	// put logic here to detect whether the specified origin is allowed.
@@ -1250,7 +1284,7 @@ function originIsAllowed(origin) {
 function consolelogjsonws(JSONstring ){
 	var jsonobj = JSON.parse(JSONstring);
 	var keys = Object.keys(jsonobj);
-	var myres = { user: "", project: "" , device: "" , execution: ""};
+	var myres = { user: "", project: "", device: "", execution_id: ""};
 	for (var i = 0; i < keys.length; i++) {
 		var labeltxt=Object.getOwnPropertyNames(jsonobj)[i];
 		labeltxt=lowercase(labeltxt);
@@ -1260,8 +1294,8 @@ function consolelogjsonws(JSONstring ){
 			myres.project = jsonobj[keys[i]];
 		}else if(labeltxt == 'device') {
 			myres.device = jsonobj[keys[i]];
-		}else if(labeltxt == 'execution') {
-			myres.execution = jsonobj[keys[i]];
+		}else if(labeltxt == 'execution_id') {
+			myres.execution_id = jsonobj[keys[i]];
 		}
 	}
 	return myres;
@@ -1317,16 +1351,17 @@ function send_device_update_to_suscribers(devicename,jsontext){
 	}}
 };
 
-function send_exec_update_to_suscribers(execname,jsontext){
+function send_exec_update_to_suscribers(exec_id,jsontext){
 	//*******************************************************************
-	if(execname != undefined){
-	if(execname.length > 0){
+	if(exec_id != undefined){
+	if(exec_id.length > 0){
 		//Now we find the suscribed users and we send copy
 		for (var u = 0; u < max_users; u++) {
 			var found_sucrip=false;
 			var i=0;
 			while(i< total_exec_suscriptions[u] && found_sucrip==false){
-				if(ExecSubscriptions[u,i]==execname){
+// 				console.log("suscriptions "+u+","+i+","+ExecSubscriptions[u,i]+ "=?"+exec_id);
+				if(ExecSubscriptions[u,i]==exec_id){
 					found_sucrip=true;
 				}else{
 					i++;
@@ -1334,7 +1369,7 @@ function send_exec_update_to_suscribers(execname,jsontext){
 			}
 			if(found_sucrip==true){
 				//we send the copy because we found the SUSCRIPTION
-				console.log("Forwarding to suscribed user: "+user_ids[u] + " Execution: "+ execname);
+				console.log("Forwarding to suscribed user: "+user_ids[u] + " Execution_id: "+ exec_id);
 				//user_conn[u].send("{\"project modified \":\""+execname+"\" }");
 				user_conn[u].send(jsontext);
 			}
@@ -1366,12 +1401,12 @@ app.ws('/', function(ws_connection, req) {
 	//******************************************
 	// received a message from the user
 	ws_connection.on('message', function(message) { //received message is message
-		user_input = consolelogjsonws( message );
+		user_input = consolelogjsonws( message);
 		user_id=find_pos_user_address(client_address);
 		if(user_id==totalusers){//address not registered, we add it at the end of the list
 			user_id=0;
 			//we look if there is any position was free in the list before the last used
-			while(user_id<totalusers && user_address[user_id]!= undefined ){
+			while(user_id<totalusers && user_address[user_id]!= undefined){
 				user_id=user_id+1;
 			}
 			if(user_id==totalusers && totalusers<max_users){//we don't found such free position, then the list increases in one position
@@ -1387,9 +1422,13 @@ app.ws('/', function(ws_connection, req) {
 		user_ids[user_id]=user_input.user;//only for debuging
 		user_conn[user_id]=ws_connection;
 		
-		//compose the message describing the update of suscription 
+		//compose the message describing the update of suscription
 		var update_suscription_msg = {};
 		update_suscription_msg["user"]= user_input.user;
+
+	// 	console.log( ' message ' + message );
+	// 	console.log( ' exec_id ' + user_input.execution_id );
+
 		if(user_input.project != undefined)
 		if(user_input.project.length > 0){
 			update_suscription_msg ["suscribed_to_project"] = user_input.project;
@@ -1398,9 +1437,9 @@ app.ws('/', function(ws_connection, req) {
 		if(user_input.device.length > 0){
 			update_suscription_msg["suscribed_to_device"] = user_input.device;
 		}
-		if(user_input.execution != undefined)
-		if(user_input.execution.length > 0){
-			update_suscription_msg ["suscribed_to_execution"] = user_input.execution;
+		if(user_input.execution_id != undefined)
+		if(user_input.execution_id.length > 0){
+			update_suscription_msg ["suscribed_to_execution"] = user_input.execution_id;
 		}
 
 		console.log(JSON.stringify(update_suscription_msg));
@@ -1443,22 +1482,22 @@ app.ws('/', function(ws_connection, req) {
 		//**********************************************************************
 		//adding suscriptoin on EXECs:
 		found_susc=false;
-		if(user_input.execution!=undefined)
-		if(user_input.execution.length > 0){
+		if(user_input.execution_id!=undefined)
+		if(user_input.execution_id.length > 0){
 			for (var i = 0; i < total_exec_suscriptions[user_id]; i++)
-				if(ExecSubscriptions[user_id,i]==user_input.execution) {
+				if(ExecSubscriptions[user_id,i]==user_input.execution_id) {
 					found_susc=true;
 // 					console.log("found previous suscription adding at "+user_id+" "+i);
 				}
 			if(found_susc==false){
-				console.log("not found previous exec suscription adding at "+user_id+" "+total_exec_suscriptions[user_id]+ ": "+user_input.execution);
-				ExecSubscriptions[user_id,total_exec_suscriptions[user_id]]=user_input.execution;
+				console.log("not found previous exec suscription adding at "+user_id+" "+total_exec_suscriptions[user_id]+ ": "+user_input.execution_id);
+				ExecSubscriptions[user_id,total_exec_suscriptions[user_id]]=user_input.execution_id;
 				total_exec_suscriptions[user_id]=total_exec_suscriptions[user_id]+1;
 			}
 		}
 		user_input.project=undefined;
 		user_input.device=undefined;
-		user_input.execution=undefined;
+		user_input.execution_id=undefined;
 	});
 	// user disconnected
 	ws_connection.on('close', function(reasonCode, description) {
@@ -1500,8 +1539,7 @@ app.all("*", function(req, res) {
 	return;
 });
 //**********************************************************
-var tryToOpenServer = function(port)
-{
+var tryToOpenServer = function(port) {
 	console.log('trying to Open port: ' + port);
 	console.log('we will get an error IF there is other server running on the same port');
 	app.listen(port, function() {
