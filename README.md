@@ -27,6 +27,13 @@ Before you can proceed, please clone the repository:
 git clone https://github.com/PHANTOM-Platform/Application-Manager.git;
 ```
 
+**OR** alternatively, if you prefer to use **svn** instead of git:
+
+```bash
+svn export https://github.com/PHANTOM-Platform/Application-Manager.git/trunk Application-Manager;
+```
+
+
 ### Dependencies
 This project requires the following dependencies to be installed:
 
