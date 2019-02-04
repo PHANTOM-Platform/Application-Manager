@@ -41,7 +41,7 @@ if (!String.prototype.endsWith) {
 			position = subjectString.length;
 		}
 		position -= searchString.length;
-		var lastIndex = subjectString.indexOf(searchString, position);
+// 		var lastIndex = subjectString.indexOf(searchString, position);
 		return lastIndex !== -1 && lastIndex === position;
 	};
 }
@@ -425,7 +425,20 @@ function repo_load_header(){
 function load_footer(){
 	var foot_phantom = document.getElementById("foot_phantom");
 	if(foot_phantom){
-	var menuhtml="<hr /><div class=\"greyfont\">PHANTOM project: 2018<br />";
+	var menuhtml ="";
+	menuhtml+="<hr/>Web Interfaces of the PHANTOM SERVERS and MANAGERS<br>";
+// 	menuhtml+="<a href=\"http://localhost:8000/repository.html\">Repository</a>&nbsp;&nbsp;";
+// 	menuhtml+="<a href=\"http://localhost:8500/appmanager.html\">Application Manager</a>&nbsp;&nbsp;";
+// 	menuhtml+="<a href=\"http://localhost:8600/resourcemanager.html\">Resource Manager</a>&nbsp;&nbsp;";
+// 	menuhtml+="<a href=\"http://localhost:8700/executionmanager.html\">Execution Manager</a>&nbsp;&nbsp;";
+	
+	menuhtml+="<a href=\"http://141.58.0.8:2777/repository.html\">Repository</a>&nbsp;&nbsp;";
+	menuhtml+="<a href=\"http://141.58.0.8:2778/localhost:8500/appmanager.html\">Application Manager</a>&nbsp;&nbsp;";
+	menuhtml+="<a href=\"http://141.58.0.8:2780/resourcemanager.html\">Resource Manager</a>&nbsp;&nbsp;";
+	menuhtml+="<a href=\"http://141.58.0.8:2781/executionmanager.html\">Execution Manager</a>&nbsp;&nbsp;";
+		
+// 	menuhtml+="<a href=\"http://localhost:3033/monitorinserver.html\">Monitoring Server</a>";
+	menuhtml+="<hr/><div class=\"greyfont\">PHANTOM project: 2019<br />";
 	menuhtml+="	Licensed under the Apache License, Version 2.0<br />";
 	menuhtml+="	You may obtain a copy of the License at:<br />";
 	menuhtml+="	<a href=\"http://www.apache.org/licenses/LICENSE-2.0\">";
