@@ -256,29 +256,28 @@ const logsmapping = {
 	}
 } ; 
 
-	var expressWs 		= require('express-ws')(app);
+	var expressWs = require('express-ws')(app);
 	var app = expressWs.app;
-//*******************************************************************
 //******************** VARIABLES FOR WSockets **********************
 //*** STORAGE OF USERS
 	const max_users=50;
 	var totalusers=0;
-	var user_ids = new Array(max_users );
-	var user_conn = new Array(max_users ); // the connetion of each user
+	var user_ids = new Array(max_users);
+	var user_conn = new Array(max_users); // the connetion of each user
 
-	var user_address = new Array(max_users ); // the connetion of each user
-	var user_index = new Array(max_users ); // the connetion of each user
+	var user_address = new Array(max_users); // the connetion of each user
+	var user_index = new Array(max_users); // the connetion of each user
 	
 //*** STORAGE OF PROJECT CONTENTS
 	const max_projects= 100;
-	const max_mensages=40;
+	const max_mensages=100;
 	var totalmensages= [max_projects];
 	for (var i = 0; i < max_projects; i++)
 		totalmensages[i]=0;
 	var ProjectContents = new Array(max_projects,max_mensages); //10 projects, stack of max_mensages contents
 	
 //*** STORAGE OF SUSCRIPTIONS
-	const max_suscrip=6;
+	const max_suscrip=100;
 
 	var total_project_suscriptions= [max_users]; //for each user
 	for (var i = 0; i < max_users; i++)
@@ -294,7 +293,8 @@ const logsmapping = {
 	for (var i = 0; i < max_users; i++)
 		total_exec_suscriptions[i]=0;
 	var ExecSubscriptions = new Array(max_users,max_suscrip); //stack of "max_suscrip" proj suscr for each user
-
+	var ExecSubscriptionsType = new Array(max_users,max_suscrip); //stack of "max_suscrip" proj suscr for each user
+	
 	var clients = [ ];// list of currently connected clients (users)
 //****************************************************
 //**********************************************************
@@ -392,6 +392,66 @@ function update_filename_path_on_json(JSONstring, project,source, filename, path
 }
 
 
+function update_request_time(JSONstring, req_date){
+	var new_json = {  }
+	var jsonobj = JSON.parse(JSONstring);
+	var keys = Object.keys(jsonobj);
+	if (req_date == undefined) req_date="";
+	new_json['req_date']=req_date;
+	new_json['req_date'+'_length']=req_date.length;
+	for (var i = 0; i < keys.length; i++) {
+		var label=Object.getOwnPropertyNames(jsonobj)[i];
+		label=lowercase(label);
+		if((label != 'req_date') && (label != 'req_date_length'))
+			new_json[label]=jsonobj[keys[i]]; //add one property
+		if( typeof jsonobj[keys[i]] == 'string'){
+			new_json[label+'_length']=jsonobj[keys[i]].length;
+		}
+	}
+	new_json=(JSON.stringify(new_json));
+	return new_json;
+}
+
+function update_exec_status(JSONstring, status){
+	var new_json = {  }
+	var jsonobj = JSON.parse(JSONstring);
+	var keys = Object.keys(jsonobj);
+	if (status == undefined) status="";
+	new_json['req_status']=status;
+	new_json['req_status'+'_length']=status.length;
+	for (var i = 0; i < keys.length; i++) {
+		var label=Object.getOwnPropertyNames(jsonobj)[i];
+		label=lowercase(label);
+		if((label != 'req_status') && (label != 'req_status_length'))
+			new_json[label]=jsonobj[keys[i]]; //add one property
+		if( typeof jsonobj[keys[i]] == 'string'){
+			new_json[label+'_length']=jsonobj[keys[i]].length;
+		}
+	}
+	new_json=(JSON.stringify(new_json));
+	return new_json;
+}
+
+function update_reject_reason(JSONstring, reason){
+	var new_json = {  }
+	var jsonobj = JSON.parse(JSONstring);
+	var keys = Object.keys(jsonobj);
+	if (reason == undefined) reason="";
+	new_json['rejection_reason']=reason;
+	new_json['rejection_reason'+'_length']=reason.length;
+	for (var i = 0; i < keys.length; i++) {
+		var label=Object.getOwnPropertyNames(jsonobj)[i];
+		label=lowercase(label);
+		if((label != 'rejection_reason') && (label != 'rejection_reason_length'))
+			new_json[label]=jsonobj[keys[i]]; //add one property
+		if( typeof jsonobj[keys[i]] == 'string'){
+			new_json[label+'_length']=jsonobj[keys[i]].length;
+		}
+	}
+	new_json=(JSON.stringify(new_json));
+	return new_json;
+}
+
 function find_id(JSONstring){
 	var response = "";
 	var jsonobj = JSON.parse(JSONstring);
@@ -431,8 +491,6 @@ function update_app_length_on_json(JSONstring, appname){
 	var jsonobj = JSON.parse(JSONstring);
 	var keys = Object.keys(jsonobj);
 	if (appname== undefined) appname="";
-	new_json['app']=appname;
-	new_json['app_length']=appname.length;
 	for (var i = 0; i < keys.length; i++) {
 		var label=Object.getOwnPropertyNames(jsonobj)[i];
 		label=lowercase(label);
@@ -442,6 +500,8 @@ function update_app_length_on_json(JSONstring, appname){
 			new_json[label+'_length']=jsonobj[keys[i]].length;
 		}
 	}
+	new_json['app']=appname;
+	new_json['app_length']=appname.length;
 	new_json=(JSON.stringify(new_json));
 	return new_json;
 }
@@ -455,7 +515,7 @@ function update_execution_id_length_on_json(JSONstring, exec_id){
 		var label=Object.getOwnPropertyNames(jsonobj)[i];
 		label=lowercase(label);
 		if((label != 'execution_id') && (label != 'execution_id_length'))
-		new_json[label]=jsonobj[keys[i]]; //add one property
+			new_json[label]=jsonobj[keys[i]]; //add one property
 		if( typeof jsonobj[keys[i]] == 'string'){
 			new_json[label+'_length']=jsonobj[keys[i]].length;
 		}
@@ -829,7 +889,7 @@ app.get('/_flush', function(req, res) {
 	});
 });
 //******************************************************************************
-app.get('/query_metadata',middleware.ensureAuthenticated, function(req, res) {
+app.get('/query_metadata', function(req, res) {
 	"use strict";
 	var pretty = find_param(req.body.pretty, req.query.pretty);
 	var currentdate = dateFormat(new Date(), "yyyy-mm-dd'T'HH:MM:ss.l");
@@ -867,7 +927,7 @@ app.get('/query_metadata',middleware.ensureAuthenticated, function(req, res) {
 	});
 });
 //**********************************************************
-app.get('/es_query_metadata', middleware.ensureAuthenticated, function(req, res) {
+app.get('/es_query_metadata', function(req, res) {
 	"use strict";
 	var currentdate = dateFormat(new Date(), "yyyy-mm-dd'T'HH:MM:ss.l");
 	var QueryBody 	= find_param(req.body.QueryBody, req.query.QueryBody);
@@ -1280,11 +1340,11 @@ function originIsAllowed(origin) {
 	return true;
 };
 
-//report on the screen the list of fields, and values
-function consolelogjsonws(JSONstring ){
+//types of executions are completed or pending, if undefined the exec manager will be considered it as "completed"
+function consolelogjsonws(JSONstring){
 	var jsonobj = JSON.parse(JSONstring);
 	var keys = Object.keys(jsonobj);
-	var myres = { user: "", project: "", device: "", execution_id: ""};
+	var myres = { user: "", project: "", device: "", execution_id: "", type: ""};
 	for (var i = 0; i < keys.length; i++) {
 		var labeltxt=Object.getOwnPropertyNames(jsonobj)[i];
 		labeltxt=lowercase(labeltxt);
@@ -1296,12 +1356,14 @@ function consolelogjsonws(JSONstring ){
 			myres.device = jsonobj[keys[i]];
 		}else if(labeltxt == 'execution_id') {
 			myres.execution_id = jsonobj[keys[i]];
+		}else if(labeltxt == 'type') {
+			myres.type = jsonobj[keys[i]];
 		}
 	}
 	return myres;
 };
 
-function send_project_update_to_suscribers(projectname,jsontext){
+function send_project_update_to_suscribers(projectname, jsontext){
 	//*******************************************************************
 	if(projectname != undefined)
 	if(projectname.length > 0){
@@ -1317,7 +1379,7 @@ function send_project_update_to_suscribers(projectname,jsontext){
 				}
 			}
 			if(found_sucrip==true){
-				//we send the copy because we found the SUSCRIPTION
+				//we send the copy because we found the SUBSCRIPTION
 				console.log("Forwarding to suscribed user: "+user_ids[u] + " Project: "+ projectname);
 				//user_conn[u].send("{\"project modified \":\""+projectname+"\" }");
 				user_conn[u].send(jsontext);
@@ -1351,7 +1413,7 @@ function send_device_update_to_suscribers(devicename,jsontext){
 	}}
 };
 
-function send_exec_update_to_suscribers(exec_id,jsontext){
+function send_exec_update_to_suscribers(exec_id, type, jsontext){
 	//*******************************************************************
 	if(exec_id != undefined){
 	if(exec_id.length > 0){
@@ -1361,7 +1423,7 @@ function send_exec_update_to_suscribers(exec_id,jsontext){
 			var i=0;
 			while(i< total_exec_suscriptions[u] && found_sucrip==false){
 // 				console.log("suscriptions "+u+","+i+","+ExecSubscriptions[u,i]+ "=?"+exec_id);
-				if(ExecSubscriptions[u,i]==exec_id){
+				if((ExecSubscriptions[u,i]==exec_id) &&(ExecSubscriptionsType[u,i]==type)){
 					found_sucrip=true;
 				}else{
 					i++;
@@ -1421,14 +1483,11 @@ app.ws('/', function(ws_connection, req) {
 		user_index[user_id]=index;
 		user_ids[user_id]=user_input.user;//only for debuging
 		user_conn[user_id]=ws_connection;
-		
 		//compose the message describing the update of suscription
 		var update_suscription_msg = {};
 		update_suscription_msg["user"]= user_input.user;
 
-	// 	console.log( ' message ' + message );
-	// 	console.log( ' exec_id ' + user_input.execution_id );
-
+	// 	console.log( ' message ' + message + '\n exec_id ' + user_input.execution_id );
 		if(user_input.project != undefined)
 		if(user_input.project.length > 0){
 			update_suscription_msg ["suscribed_to_project"] = user_input.project;
@@ -1480,7 +1539,7 @@ app.ws('/', function(ws_connection, req) {
 			}
 		}
 		//**********************************************************************
-		//adding suscriptoin on EXECs:
+		//adding subscription on EXECs:
 		found_susc=false;
 		if(user_input.execution_id!=undefined)
 		if(user_input.execution_id.length > 0){
