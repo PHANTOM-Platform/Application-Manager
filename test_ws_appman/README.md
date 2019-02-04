@@ -32,19 +32,10 @@ bash test_client_ws_suscriber_appmanager.sh;
 #### 4.- Perform some updates to the APP-Resource Manager, which will be forwared to the suscribed client
 
 I suggest to run the next strings on a different terminal, or computer, to make it clear what is the feedback to the suscribed client
-
-```bash
-bash test_appman_devices_update_db.sh
-```
-
+ 
 ```bash
 bash test_appman_project_update_db.sh
 ```
-
-```bash
-bash test_appman_execs_update_db.sh
-```
-
 
 Demonstration step-by-step video of suscribing with JAVA to notifications to the APP-Manager is available at [Demo WS][Demo WS].
 
