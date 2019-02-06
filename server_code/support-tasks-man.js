@@ -15,23 +15,23 @@
 //     See the License for the specific language governing permissions and
 //     limitations under the License.
 
-var my_type = 'tasks'
+var my_type = 'tasks';
 
 const CommonModule 		= require('./support-common');
 
 module.exports = {
-	compose_query: function(project ){
+compose_query: function(project ){
 	var mquery=undefined;
 	if (project != undefined)
 	if (project.length > 0){
 		mquery=[{"match_phrase":{"project":project}},{"term":{"project_length":project.length}}];
 	}
-// 	console.log("mquery is " +JSON.stringify(mquery));
 	if(mquery!=undefined ){
 		mquery={"query":{"bool":{"must": mquery }}, "sort": { "project": { "order": "asc" }}};
 	}else{
 		mquery={"query":{"match_all": {} }, "sort": { "project": { "order": "asc" }}};
 	}
+// 	console.log("mquery is " +JSON.stringify(mquery));
 	return mquery;
 },
 register_json: function(es_server, my_index, body, remoteAddress) {
@@ -87,9 +87,9 @@ find_project_id: function(es_server, my_index, project){
 			}
 		}, function(error, response) {
 			if (error) {
-				reject ("error: "+error);
+				reject("error: "+error);
 			}else{
-				resolve (CommonModule.remove_quotation_marks(JSON.stringify(response.hits.hits[0]._id)));
+				resolve(CommonModule.remove_quotation_marks(JSON.stringify(response.hits.hits[0]._id)));
 			}
 		});
 	});
@@ -103,7 +103,7 @@ find_project: function(es_server, my_index, project, pretty){
 		var client = new elasticsearch.Client({
 			host: es_server,
 			log: 'error'
-		}); 
+		});
 		if(project==undefined){
 			resolve({});
 		}else if(project.length==0){
@@ -132,7 +132,7 @@ find_project: function(es_server, my_index, project, pretty){
 				};
 				resolve("{\"hits\" :["+result+"]}");
 			});
-		}else{ 
+		}else{
 			client.search({
 				index: my_index,
 				type: my_type,
@@ -141,7 +141,7 @@ find_project: function(es_server, my_index, project, pretty){
 						{"match_phrase":{"project": project }}, {"term":{"project_length": project.length}}
 					]}}
 				}
-			}, function(error, response) {
+			},function(error, response){
 				if (error) {
 					reject ("error: "+error);
 				}else{
@@ -219,7 +219,7 @@ query_metadata: function(es_server, my_index, bodyquery, pretty) {
 			type: my_type,
 			size: 10,
 			body: bodyquery
-		},function (error, response,status) {
+		},function (error, response, status) {
 			if (error){
 				reject("search error: "+error)
 			} else {
