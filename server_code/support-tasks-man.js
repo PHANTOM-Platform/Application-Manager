@@ -120,6 +120,7 @@ find_project: function(es_server, my_index, project, pretty){
 					var keys = Object.keys(response.hits.hits);
 					keys.forEach(function(key) {
 						item = JSON.parse(JSON.stringify(response.hits.hits[key]._source));
+						item._id=response.hits.hits[key]._id;
 						if(result!=""){
 							result+=",";
 						}
@@ -146,6 +147,7 @@ find_project: function(es_server, my_index, project, pretty){
 					reject ("error: "+error);
 				}else{
 					item = JSON.parse(JSON.stringify(response.hits.hits[0]._source));
+					item._id=response.hits.hits[0]._id;
 					if((pretty=="true")||(pretty=="TRUE")){
 						resolve(" "+(JSON.stringify(item, null, 4)));
 					}else{
