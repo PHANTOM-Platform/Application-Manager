@@ -1,0 +1,36 @@
+{
+	"labels": "values",
+	"project": "demo_hpc",
+	"source": {"completed": "waiting",
+		"my_user_label":"addtional labels are optional", "any_other_user_label":"mondays" },
+	"pt":  {"completed": "waiting"},
+	"mbt_early_validation": {"completed": "waiting"},
+	"ip_core_generator": {"completed": "waiting", "some_label":"some_description_for_mom"},
+	"mom": {"completed": "waiting", "comment":"completed when a mapping is available, then we can run the app"}
+}
+
+
+
+
+Each PHANTOM tool may be notified when their dependences are solved (those depences become "completed"="true")
+I will define an interface for such diferent notifications or queries a common interface for everybody, where just specify the set of steps to be completed, Similar as we did for the Execution Manager.
+
+
+
+The idea is to follow the steps:
+
+1- The USER confirms that the source code is completely uploaded TO the APP-MANAGER
+2- PT and MBT know step 1 is completed=true (the be notified or they query the app-manager)
+3- The IP core generator may run when "pt" is completed=true.
+4- MOM may run when the previous steps are completed="true"
+10- I think MBT whats that 2b will run again, then it trigers to run again, right?
+    In such case can set "completed"="waiting" for "mbt_early_validation",
+    which will trigers a notification to MOM when "mbt_early_validation" become "completed"="true"
+
+
+- “waiting” - tool waiting for some tool our resource to be available 
+- “started” - tool started its activity
+- “finished” - tool finished its activity
+- “error” - tool encountered an error
+- "not_required"--
+

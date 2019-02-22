@@ -35,6 +35,7 @@
 		APP name (optional): <input type="text" name="appname" id="appname" value=""> leave empty if not wish to filter by name<br>
 		<input type="hidden" name="pretty" value="true">
 		<!-- upload button-->
+		<input type="submit" onclick="return list_apps(6,document.getElementById('appname').value)" value="Show Project-STATUS in Table" />
 		<input type="submit" onclick="return list_apps(1,document.getElementById('appname').value)" value="Show results in Table"/>
 		<input type="submit" onclick="return list_apps(2,document.getElementById('appname').value)" value="Show results as JSON"/>
 		<input type="submit" onclick="return list_apps(3,document.getElementById('appname').value)" value="Show raw reply from server"/>
