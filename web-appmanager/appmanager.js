@@ -10,7 +10,7 @@
 */
 
 // The defininition of server addresses may use for redirection cases, not define them if you don't know what are you doing.
-// var appserver = "141.58.0.8" or "localhost"; 
+// var appserver = "141.58.0.8" or "localhost";
 // var appport = 8500;
 // var resourceserver = "141.58.0.8" or "localhost";
 // var resourceport = 2780 or 8600;
@@ -24,7 +24,6 @@
 // Note that an XMLHttpRequest connection is subject to specific limits that are enforced for security reasons.
 // One of the most obvious is the enforcement of the same origin policy.
 // You cannot access resources on another server, unless the server explicitly supports this using CORS (Cross Origin Resource Sharing).
-
 
 // var s = 'a string', array for [], object for {}
 function getType(p) {
@@ -477,7 +476,8 @@ function repo_load_header(){
 	menuhtml+="	<li class=\"menuphantom\"><a href=\"download_file.html\">Download a file</a></li>";
 	menuhtml+="	<li class=\"menuphantom\"><a href=\"download_zip.html\">Download a zip file</a></li>";
 	menuhtml+="	<li class=\"menuphantom\"><a href=\"examplec.json\">Download JSON example</a></li>";
-	
+	menuhtml+="	<li class=\"menuphantom\"><a href=\"log_list.html\">List of logs</a></li>";
+
 // 	class="active"
 	menuhtml+="	<li class=\"phantomlogo\" style=\"float:right\">";
 	menuhtml+="	<img src=\"phantom.gif\" alt=\"PHANTOM\" height=\"32\" style=\"background-color:white;\">";
@@ -697,6 +697,149 @@ function exec_login(user,password){
 	return false;
 }
 
+
+function jsontotable_repo_logs_brief(myjson,count,first,level,lastwascoma,mtitle,filtered_fields){
+	var html ="";
+	var i;
+// 	if(first==true){ html ="{"; }
+	var mainc=mtitle;
+	if(first==true){
+		html += "<div><table style='border:1px solid black'>\n";// style='width:100%'>";
+		html += "<th><strong> _id </strong> </th>\n";
+		html += "<td><strong> code </strong></td>\n";
+		html += "<td><strong> user </strong></td>\n";
+		html += "<td><strong> ip </strong></td>\n";
+		html += "<td><strong> message </strong></td>\n";
+		html += "<td><strong> date</strong></td>\n";
+		count++;
+	}
+	first=false;
+	var countseries=0;
+	myjson.forEach(function(val) {
+// 		if (count != 1 && lastwascoma==false) {
+// 			if(countseries==0) {
+// 				html += ",<br>";
+// 			}else{
+// 				html += "<br>},{<br>";
+// 			}
+// 		};//this is not the first element
+		lastwascoma=true;
+		var keys = Object.keys(val);
+		keys.forEach(function(key) {
+			if (getType(val[key]) == "string" || getType(val[key]) == "other" ){
+				var tobefiltered=false;
+				for (i=0;i< filtered_fields.length;i++){
+					if (key.endsWith(filtered_fields[i], key.length)== true) {
+						tobefiltered=true;
+					}
+				}
+				if (tobefiltered== false) {//it is stored the length of the strings, not need to show
+// 					if (count != 1 && lastwascoma==false) html += ',<br>';
+// 					for (i = 0; i < level; i++) {
+// 						if (count != 1) html += '&emsp;';
+// 					}
+					if(mtitle==true){
+						if(count>1){
+							html += "</tr>\n<tr>";
+// 							html += "</table></div></td><br>\n";
+// 							html += "<div><table style='border:1px solid black'>\n";// style='width:100%'>";
+						}
+						html += "<td> " + val['_id'] +" </td>\n";
+						//source
+						if(val['_source'] !=undefined){
+							if(val['_source']['code']==undefined){
+								html += "<td></td>\n";
+							}else if(val['_source']['code']!="200"){ //yellow
+								html += "<td bgcolor=\"#f3ff3a\"> " + val['_source']['code'] +" </td>\n";
+							}else if(val['_source']['code']=="200"){//green
+								html += "<td bgcolor=\"#00FF00\"> " + val['_source']['code'] +" </td>\n";
+	// 						}else if(val['_source']['code']=="cancelled"){//red
+	// 							html += "<td bgcolor=\"#ff3e29\"> " + val['_source']['code'] +" </td>\n";
+	// 						}else if(val['_source']['code']=="started"){//green
+	// 							html += "<td bgcolor=\"#00FF00/*\*/">" + val['_source']['code'] +"</td>\n";
+	// 						}else{
+	// // 							html += "<td> " + val['_source']['code'] +"</td>\n";
+							}
+						
+							if(val['_source']['user']==undefined){
+									html += "<td></td>\n"; 
+							}else{
+								html += "<td> " + val['_source']['user'] +" </td>\n";
+							}
+							if(val['_source']['ip']==undefined){
+									html += "<td></td>\n"; 
+							}else{
+								html += "<td> " + val['_source']['ip'] +" </td>\n";
+							}
+							if(val['_source']['message']==undefined){
+									html += "<td></td>\n"; 
+							}else{
+								html += "<td> " + val['_source']['message'] +" </td>\n";
+							}
+							if(val['_source']['date']==undefined){
+									html += "<td></td>\n"; 
+							}else{
+								html += "<td> " + val['_source']['date'] +" </td>\n";
+							}
+						}else{
+							html += "<td></td>\n";
+							html += "<td></td>\n";
+							html += "<td></td>\n";
+							html += "<td></td>\n";
+							html += "<td></td>\n";
+						}
+						mtitle=false;
+						count++;
+						lastwascoma=false;
+					}
+// 					if((key=="rejection_reason")){
+// 						if(val['req_status']=="rejected"){
+// 							html += "<td><strong>\"" + key +"\"</strong>: \"" + val[key] +"\"</td>\n";
+// 							count++;
+// 							lastwascoma=false;
+// 						}
+// 					}else if((key!="req_status")&&(key!="energy")&&(key!="execution_id")&&(key!="app")&&(key!="device")){
+// 						html += "<td><strong>\"" + key +"\"</strong>: \"" + val[key] +"\"</td>\n";
+// 						count++;
+// 						lastwascoma=false;
+				}
+			}else if (getType(val[key]) == "array" || getType(val[key]) == "object" ) {
+// 				if(key!= "component_stats"){
+// // 					if (count != 1) html += ',<br>';
+// // 					for (i = 0; i < level; i++) {
+// // 						if (count != 1) html += '&emsp;';
+// // 					}
+// 					if(mtitle==true){
+// 						if(count>1){
+// 							html += "</table></div></td><br>\n";
+// 							html += "<div><table style='border:1px solid black'>\n";// style='width:100%'>";
+// 						}
+// 						html += "<tr><th><strong>\"" + key + "\"</strong>: </th>\n";
+// 						
+// 						mtitle=false;
+// 					}else{
+// 						html += "<tr><td><strong>\"" + key + "\"</strong>: </td>\n";
+// 					}
+// 					count++;
+// 					lastwascoma=false;
+// 					html += "<td><div><table style='width:100%; border:0px solid black'>\n";// style='width:100%'>";
+					html += jsontotable_repo_logs_brief( ([ val[key] ]), count, first, level+1 ,lastwascoma,mtitle,filtered_fields);
+// 					html += "</table></div></td>\n";
+// 				}
+// // 			}else if (getType(val[key]) == "object" ) {
+// // 				html += jsontotable( ([ val[key] ]), count, false, level+1,lastwascoma,mtitle,filtered_fields);
+			};
+		});
+// 		mtitle=true;
+		countseries++;
+	});
+// 	if(first==true){ html += "<br>}"; }
+// 	if(mainc==true)
+// 		html += "</table></div>\n";
+	return html;
+}//jsontotable_repo_logs_brief
+
+
 //_filter_workflow_taskid_experimentid
 function jsontotable_exec_brief(myjson,count,first,level,lastwascoma,mtitle,filtered_fields){
 	var html ="";
@@ -706,12 +849,12 @@ function jsontotable_exec_brief(myjson,count,first,level,lastwascoma,mtitle,filt
 	if(mtitle==true){
 		html += "<div><table style='border:1px solid black'>\n";// style='width:100%'>";
 			html += "<th><strong> execution_id </strong> </th>\n";
-			html += "<td><strong> Req status </strong></td>\n"; 
-		html += "<td><strong> Project </strong></td>\n"; 
+			html += "<td><strong> Req status </strong></td>\n";
+		html += "<td><strong> Project </strong></td>\n";
 		html += "<td><strong> Map </strong></td>\n";
 		html += "<td><strong> Requested-by</strong></td>\n";
-		html += "<td><strong> Input </strong></td>\n"; 
-		html += "<td><strong> Request date </strong></td>\n"; 
+		html += "<td><strong> Input </strong></td>\n";
+		html += "<td><strong> Request date </strong></td>\n";
 		html += "<td><strong>Start timestamp</strong></td>\n";
 		html += "<td><strong>End timestamp</strong></td>\n";
 		count++;
@@ -1405,20 +1548,21 @@ function list_results(mytype,url,fields_toshow,filtered_fields){
 			if(myjson.hits!=undefined) {
 				console.log("myjsob "+JSON.stringify(myjson));
 				myjson = myjson.hits;
-// 					myjson.forEach(function(val) {
-// 						var keys = Object.keys(val);
-// 						keys.forEach(function(key) {
-// 							if()
-// 					if
-						
-// 						['source']['status']	
-			
 			}else{
 				myjson = [ myjson ];
 			}
 			if(myjson!=undefined) {
 				if (mytype== 1) {
 					html += jsontotable(myjson,1,true,1,false,true,filtered_fields);
+				}else if (mytype == 20){
+					html += jsontotable_repo_logs_brief(myjson,1,true,1,false,true,filtered_fields);
+					html += "</table></div>\n";
+				}else if (mytype == 21){
+					html += jsontotable_app_logs_brief(myjson,1,true,1,false,true,filtered_fields);
+					html += "</table></div>\n";
+				}else if (mytype == 22){
+					html += jsontotable_exec_logs_brief(myjson,1,true,1,false,true,filtered_fields);
+					html += "</table></div>\n";
 				}else if (mytype == 5){
 					html += jsontotable_exec_brief(myjson,1,true,1,false,true,filtered_fields);
 				}else if (mytype == 6){
@@ -1505,7 +1649,27 @@ function list_results_with_token( mytype ,url,fields_toshow, filtered_fields) {
 
 function list_apps(mytype,appname){
 	var url = build_appman_path() + "/get_app_list?project=\""+appname+"\"";//?pretty='true'";
-	list_results(mytype,url,["host"],["_length"]);
+	list_results(mytype,url,["_id"],["_length"]);
+	return false;
+}
+
+function list_repo_logs(mytype,user){
+	var url = build_repo_path() + "/get_log_list?pretty='true'";
+	list_results(mytype,url,["host"],["_length","_index","_type","_score","sort"]);
+	return false;
+}
+
+
+function list_app_logs(mytype,appname){
+	var url = build_appman_path() + "/get_log_list?pretty='true'";
+	list_results(mytype,url,["host"],["_length","_index","_type","_score","sort"]);
+	return false;
+}
+
+
+function list_exec_logs(mytype,execid){
+	var url = build_execman_path() + "/get_log_list?pretty='true'";
+	list_results(mytype,url,["host"],["_length","_index","_type","_score","sort"]);
 	return false;
 }
 
@@ -1593,7 +1757,6 @@ function submitform_qr_metatada_es(e, frm) {
 	submitform(url, 'GET', 'metadata.json');
 	return false;
 }
-
 
 function submitform_file_list(project, source,filepath){
 	if(project == undefined){
