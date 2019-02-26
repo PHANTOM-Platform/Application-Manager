@@ -355,7 +355,7 @@ function consolelogjson(JSONstring ){
 		console.log("pos: " + jsonobj.indexOf(labeltxt));
 	}
 }
-//*********************************************************************	
+//*********************************************************************
 //the purpose is to remove the fields/properties path,path_length, filename,filename_length, if present.
 //and generate thos fields/properties from the input parameters
 function update_filename_path_on_json(JSONstring, project,source, filename, path){
@@ -537,13 +537,12 @@ function get_source_project_json(JSONstring){
 	}
 	return myres;
 }
-//*********************************************************************	
-// function generate_json_example(){ 
+//*********************************************************************
+// function generate_json_example(){
 // 	var Employee = {
 // 		firstname: "Pedro",
 // 		lastname: "Picapiedra"
 // 	}
-// 	console.log(Employee);
 // 	delete Employee.firstname; //delete one property
 // 	var label='age';
 // 	Employee[label]="32"; //add one property
@@ -741,43 +740,52 @@ app.get('/app_update3.json', function(req, res) {
 });
 
 
+app.get('/log_list.html', function(req, res) {
+	var filePath = '../web-appmanager/log_list.html';
+	retrieve_file(filePath,res);
+});
+
+
+
+
+
 //*******************************
 //*******************************
 app.get('/executionmanager.html', function(req, res) {
-	var filePath = '../web/executionmanager.html';
+	var filePath = '../web-execmanager/executionmanager.html';
 	retrieve_file(filePath,res);
 }); 
 //*******************************
 app.get('/exec_new.html', function(req, res) {
-	var filePath = '../web/exec_new.html';
+	var filePath = '../web-execmanager/exec_new.html';
 	retrieve_file(filePath,res);
 });
 //*******************************
 app.get('/exec_update.html', function(req, res) {
-	var filePath = '../web/exec_update.html';
+	var filePath = '../web-execmanager/exec_update.html';
 	retrieve_file(filePath,res);
 }); 
 //*******************************
 app.get('/exec_list.html', function(req, res) {
-	var filePath = '../web/exec_list.html';
+	var filePath = '../web-execmanager/exec_list.html';
 	retrieve_file(filePath,res);
 });
 //*******************************
 app.get('/exec_update1.json', function(req, res) {
-	var filePath = '../web/exec_update1.json';
+	var filePath = '../web-execmanager/exec_update1.json';
 	retrieve_file(filePath,res);
 });
 //*******************************
 app.get('/exec_update2.json', function(req, res) {
-	var filePath = '../web/exec_update2.json';
+	var filePath = '../web-execmanager/exec_update2.json';
 	retrieve_file(filePath,res);
 });
 //*******************************
 
-app.get('/query_metadata.html', function(req, res) {
-	var filePath = 'web/query_metadata.html';
-	retrieve_file(filePath,res);
-});
+// app.get('/query_metadata.html', function(req, res) {
+// 	var filePath = '../web-execmanager/query_metadata.html';
+// 	retrieve_file(filePath,res);
+// });
 //***********************************
 // Path only accesible when Authenticated
 app.get('/private',middleware.ensureAuthenticated, function(req, res) {
