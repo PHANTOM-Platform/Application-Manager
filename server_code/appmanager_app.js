@@ -988,6 +988,30 @@ function register_task(req, res,new_task){
 	});
 }//register_task
 //********************************************************** 
+app.post('/new_log', function(req, res) {
+	"use strict";
+	var currentdate = dateFormat(new Date(), "yyyy-mm-dd'T'HH:MM:ss.l");
+	var pretty		= find_param(req.body.pretty, req.query.pretty);
+	var log_code	= find_param(req.body.code, req.query.code);
+	var log_user	= find_param(req.body.user, req.query.user);
+	var log_ip		= find_param(req.body.ip, req.query.ip);
+	var log_message	= find_param(req.body.message, req.query.message);
+	if(log_code==undefined) log_code="";
+	if(log_user==undefined) log_user="";
+	if(log_ip==undefined) log_ip="";
+	if(log_message==undefined) log_message="";
+	var resultlog = LogsModule.register_log(es_servername + ":" + es_port, SERVERDB, log_code, log_ip, log_message, currentdate, log_user);
+	resultlog.then((resolve_result) => {
+		res.writeHead(200, {"Content-Type": contentType_text_plain});
+		res.end("registered log\n", 'utf-8');
+		return;
+	},(reject_result)=> {
+		res.writeHead(reject_result.code, {"Content-Type": contentType_text_plain});
+		res.end(reject_result.text+": ERROR register_log\n", 'utf-8');
+		return;
+	});
+});
+
 app.post('/register_new_project',middleware.ensureAuthenticated, function(req, res) {
 	register_task(req, res,true);
 });
@@ -1065,6 +1089,44 @@ app.get('/get_app_list', function(req, res) {
 		return;
 	});
 });
+
+app.get('/get_log_list', function(req, res) {
+	"use strict";
+	var currentdate = dateFormat(new Date(), "yyyy-mm-dd'T'HH:MM:ss.l");
+	var pretty		= find_param(req.body.pretty, req.query.pretty);
+// 	var projectname	= CommonModule.remove_quotation_marks(find_param(req.body.project, req.query.project));
+// 	if (projectname==undefined) projectname="";
+
+	var result_count = LogsModule.query_count_logs(es_servername + ":" + es_port,SERVERDB, res.user);
+	result_count.then((resultResolve) => {
+		if(resultResolve!=0){//new entry (2) we resister new entry
+			var result_id = LogsModule.find_logs(es_servername + ":" + es_port,SERVERDB, res.user,pretty);
+			result_id.then((result_json) => {
+				res.writeHead(200, {"Content-Type": contentType_text_plain});
+				res.end(result_json);
+				return;
+			},(result_idReject)=> {
+				res.writeHead(408, {"Content-Type": contentType_text_plain});
+				res.end("error requesting list of logs", 'utf-8');
+				return;
+			});
+		}else{
+			res.writeHead(430, {"Content-Type": contentType_text_plain});	//not put 200 then webpage works
+// 			if(projectname.length==0){
+				res.end("Empty list of logs" );
+// 			}else{
+// 				res.end("App \""+projectname+"\" not found");
+// 			}
+			return;
+		}
+	},(resultReject)=> {
+		res.writeHead(402, {"Content-Type": contentType_text_plain});
+		res.end(resultReject + "\n", 'utf-8'); //error counting projects in the DB
+		var resultlog = LogsModule.register_log(es_servername + ":" + es_port,SERVERDB,400,req.connection.remoteAddress,"ERROR on requesting list of logs",currentdate,res.user);
+		return;
+	});
+});
+
 
 //**********************************************************
 app.get('/query_task',middleware.ensureAuthenticated, function(req, res) {
