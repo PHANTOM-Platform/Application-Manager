@@ -813,14 +813,14 @@ app.get('/drop_db', function(req, res) {
 	var currentdate = dateFormat(new Date(), "yyyy-mm-dd'T'HH:MM:ss.l");
 	console.log("\n[LOG]: Deleting Database");
 	console.log("   " +colours.FgYellow + colours.Bright + " request from IP:" + req.connection.remoteAddress + colours.Reset);
-	if(( req.connection.remoteAddress!= ips[0] ) &&( req.connection.remoteAddress!=ips[1])&&( req.connection.remoteAddress!=ips[2])){
-		console.log(" ACCESS DENIED from IP address: "+req.connection.remoteAddress);
-		res.writeHead(403, {"Content-Type": contentType_text_plain});
-		res.end("\n403: FORBIDDEN access from external IP.\n");
-		var messagea = "Deleting Database FORBIDDEN access from external IP.";
-		resultlog = LogsModule.register_log(es_servername+":"+es_port,SERVERDB, 403,req.connection.remoteAddress,messagea,currentdate,"");
-		return;
-	}
+// 	if(( req.connection.remoteAddress!= ips[0] ) &&( req.connection.remoteAddress!=ips[1])&&( req.connection.remoteAddress!=ips[2])){
+// 		console.log(" ACCESS DENIED from IP address: "+req.connection.remoteAddress);
+// 		res.writeHead(403, {"Content-Type": contentType_text_plain});
+// 		res.end("\n403: FORBIDDEN access from external IP.\n");
+// 		var messagea = "Deleting Database FORBIDDEN access from external IP.";
+// 		resultlog = LogsModule.register_log(es_servername+":"+es_port,SERVERDB, 403,req.connection.remoteAddress,messagea,currentdate,"");
+// 		return;
+// 	}
 	var searching = MetadataModule.drop_db(es_servername+":"+es_port, SERVERDB);
 	searching.then((resultFind) => {
 		res.writeHead(200, {"Content-Type": contentType_text_plain});
@@ -921,7 +921,44 @@ function register_task(req, res,new_task){
 	send_project_update_to_suscribers(projectname,jsontext);
 	var result_count = TasksModule.query_count_project(es_servername + ":" + es_port,SERVERDB, projectname);
 	result_count.then((resultResolve) => {
-		if(resultResolve==0){//new entry (2) we resister new entry 
+		if(resultResolve==0){//new entry (2) we resister new entry
+			var jsonobj = JSON.parse(jsontext);
+			if ( jsonobj['development']==undefined){
+				jsonobj['development']={};
+				jsonobj['development']['completed']="false";
+			}else if(jsonobj['development']['completed']==undefined){
+				jsonobj['development']['completed']="false";
+			}
+			
+			if ( jsonobj['pt_ca']==undefined){
+				jsonobj['pt_ca']={};
+				jsonobj['pt_ca']['completed']="false";
+			}else if(jsonobj['pt_ca']['completed']==undefined){
+				jsonobj['pt_ca']['completed']="false";
+			}
+			
+			if ( jsonobj['mbt_early_validation']==undefined){
+				jsonobj['mbt_early_validation']={};
+				jsonobj['mbt_early_validation']['completed']="false";
+			}else if(jsonobj['mbt_early_validation']['completed']==undefined){
+				jsonobj['mbt_early_validation']['completed']="false";
+			}
+			
+			if ( jsonobj['ip_core_generator']==undefined){
+				jsonobj['ip_core_generator']={};
+				jsonobj['ip_core_generator']['completed']="false";
+			}else if(jsonobj['ip_core_generator']['completed']==undefined){
+				jsonobj['ip_core_generator']['completed']="false";
+			}
+			
+			if ( jsonobj['mom']==undefined){
+				jsonobj['mom']={};
+				jsonobj['mom']['completed']="false";
+			}else if(jsonobj['mom']['completed']==undefined){
+				jsonobj['mom']['completed']="false";
+			}
+			jsontext=(JSON.stringify(jsonobj));
+			
 			var result = TasksModule.register_json(es_servername + ":" + es_port,SERVERDB, jsontext,"");
 			result.then((resultResolve) => {
 				resultlog = LogsModule.register_log(es_servername + ":" + es_port,SERVERDB, 200,req.connection.remoteAddress,"Add task Succeed",currentdate,res.user);
@@ -1171,7 +1208,18 @@ app.get('/query_task',middleware.ensureAuthenticated, function(req, res) {
 // app.post('/signup',ipfilter(ips, {mode: 'allow'}), function(req, res) {
 app.post('/signup', function(req, res) {
 	"use strict";
-	var currentdate = dateFormat(new Date(), "yyyy-mm-dd'T'HH:MM:ss.l"); 
+	var currentdate = dateFormat(new Date(), "yyyy-mm-dd'T'HH:MM:ss.l");
+	if( (req.body==undefined) && (req.query==undefined)){
+		res.writeHead(400, {"Content-Type": contentType_text_plain});
+		res.end("\n400: Missing parameters.\n");
+		return;
+	}
+	if(req.body==undefined) {
+		req.body={};
+	}
+	if(req.query==undefined){
+		req.query={};
+	}	
 	var name= find_param(req.body.userid, req.query.userid);
 	var email= find_param(req.body.email, req.query.email);
 	var pw=find_param(req.body.pw, req.query.pw);
@@ -1201,14 +1249,14 @@ app.post('/signup', function(req, res) {
 	console.log("[LOG]: REGISTER USER+PW ");
 	console.log("   " +colours.FgYellow + colours.Bright + " user: " + colours.Reset + email );
 	console.log("   " +colours.FgYellow + colours.Bright + " request from IP: " + req.connection.remoteAddress + colours.Reset+"\n");
-	if(( req.connection.remoteAddress!= ips[0] ) &&( req.connection.remoteAddress!=ips[1])&&( req.connection.remoteAddress!=ips[2])){
-		console.log(" ACCESS DENIED from IP address: "+req.connection.remoteAddress);
-		var messagea = "REGISTER USER '"+ email + "' FORBIDDEN access from external IP";
-		resultlog = LogsModule.register_log( es_servername+":"+es_port,SERVERDB,403,req.connection.remoteAddress,messagea,currentdate,"");
-		res.writeHead(403, {"Content-Type": contentType_text_plain});
-		res.end("\n403: FORBIDDEN access from external IP.\n");
-		return;
-	}
+// 	if(( req.connection.remoteAddress!= ips[0] ) &&( req.connection.remoteAddress!=ips[1])&&( req.connection.remoteAddress!=ips[2])){
+// 		console.log(" ACCESS DENIED from IP address: "+req.connection.remoteAddress);
+// 		var messagea = "REGISTER USER '"+ email + "' FORBIDDEN access from external IP";
+// 		resultlog = LogsModule.register_log( es_servername+":"+es_port,SERVERDB,403,req.connection.remoteAddress,messagea,currentdate,"");
+// 		res.writeHead(403, {"Content-Type": contentType_text_plain});
+// 		res.end("\n403: FORBIDDEN access from external IP.\n");
+// 		return;
+// 	}
 	var result = UsersModule.register_new_user(es_servername+":"+es_port,SERVERDB, name, email, pw);
 	result.then((resultreg) => {
 		var messageb = "REGISTER USER '"+ email + "' GRANTED";
@@ -1237,6 +1285,17 @@ app.post('/signup', function(req, res) {
 app.post('/update_user', function(req, res) {
 	"use strict";
 	var currentdate = dateFormat(new Date(), "yyyy-mm-dd'T'HH:MM:ss.l");
+	if( (req.body==undefined) && (req.query==undefined)){
+		res.writeHead(400, {"Content-Type": contentType_text_plain});
+		res.end("\n400: Missing parameters.\n");
+		return;
+	}
+	if(req.body==undefined) {
+		req.body={};
+	}
+	if(req.query==undefined){
+		req.query={};
+	}
 	var name= find_param(req.body.userid, req.query.userid);
 	var email= find_param(req.body.email, req.query.email);
 	var pw=find_param(req.body.pw, req.query.pw);
@@ -1262,13 +1321,13 @@ app.post('/update_user', function(req, res) {
 		resultlog = LogsModule.register_log(es_servername+":"+es_port,SERVERDB, 400,req.connection.remoteAddress,"SIGNUP Bad Request, Empty Email",currentdate,"");
 		return;
 	}
-	if(( req.connection.remoteAddress!= ips[0] ) &&( req.connection.remoteAddress!=ips[1])&&( req.connection.remoteAddress!=ips[2])){
-		var messagea = "REGISTER USER '"+ email + "' FORBIDDEN access from external IP";
-		resultlog = LogsModule.register_log(es_servername+":"+es_port,SERVERDB, 403,req.connection.remoteAddress,messagea,currentdate,"");
-		res.writeHead(403, {"Content-Type": contentType_text_plain});
-		res.end("\n403: FORBIDDEN access from external IP.\n");
-		return;
-	}
+// 	if(( req.connection.remoteAddress!= ips[0] ) &&( req.connection.remoteAddress!=ips[1])&&( req.connection.remoteAddress!=ips[2])){
+// 		var messagea = "REGISTER USER '"+ email + "' FORBIDDEN access from external IP";
+// 		resultlog = LogsModule.register_log(es_servername+":"+es_port,SERVERDB, 403,req.connection.remoteAddress,messagea,currentdate,"");
+// 		res.writeHead(403, {"Content-Type": contentType_text_plain});
+// 		res.end("\n403: FORBIDDEN access from external IP.\n");
+// 		return;
+// 	}
 	var result = UsersModule.update_user(es_servername+":"+es_port,SERVERDB, name, email, pw);
 	result.then((resultreg) => {
 		var messageb = "UPDATE USER '"+ email + "' GRANTED";
@@ -1296,6 +1355,17 @@ app.get('/login', function(req, res) {
 	"use strict";
 	var resultlog;
 	var currentdate = dateFormat(new Date(), "yyyy-mm-dd'T'HH:MM:ss.l"); 
+		if( (req.body==undefined) && (req.query==undefined)){
+		res.writeHead(400, {"Content-Type": contentType_text_plain});
+		res.end("\n400: Missing parameters.\n");
+		return;
+	}
+	if(req.body==undefined) {
+		req.body={};
+	}
+	if(req.query==undefined){
+		req.query={};
+	}
 	var email= find_param(req.body.email, req.query.email);
 	var pw=find_param(req.body.pw, req.query.pw);
 	if (pw == undefined){
@@ -1326,19 +1396,19 @@ app.get('/login', function(req, res) {
 			var mytoken= auth.emailLogin(email);
 			res.writeHead(200, {"Content-Type": contentType_text_plain});
 			res.end(mytoken);
-			resultlog = LogsModule.register_log(es_servername+":"+es_port,SERVERDB, 200, req.connection.remoteAddress, "New token Generated",currentdate,"");
+			resultlog = LogsModule.register_log(es_servername+":"+es_port,SERVERDB, 200, req.connection.remoteAddress, "New token Generated",currentdate,email);
 		}else{
 			res.writeHead(401, {"Content-Type": contentType_text_plain});
 			res.end("401 (Unauthorized) Autentication failed, incorrect user " +" or passwd " +"\n");
 // 			console.log("resultCount "+resultCount);
 			resultlog = LogsModule.register_log(es_servername+":"+es_port,SERVERDB, 401, req.connection.remoteAddress,
-				"401: Bad Request of Token, incorrect user or passwd "+email+"or passwd ",currentdate,"");
+				"401: Bad Request of Token, incorrect user \""+email+"\" or passwd or passwd ",currentdate,email);
 		}
 	},(resultReject)=> {
 		res.writeHead(400, {"Content-Type": contentType_text_plain});
 		res.end("\n400: Bad Request "+resultReject+"\n");
 		resultlog = LogsModule.register_log(es_servername+":"+es_port,SERVERDB, 400, req.connection.remoteAddress, 
-				"400: Bad Token Request "+resultReject,currentdate,"");
+				"400: Bad Token Request "+resultReject,currentdate,email);
 	});
 }); // login
 function originIsAllowed(origin) {
