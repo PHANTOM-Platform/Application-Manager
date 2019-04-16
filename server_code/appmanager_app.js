@@ -704,6 +704,11 @@ app.get('/appmanager.html', function(req, res) {
 	retrieve_file(filePath,res);
 });
 
+app.get('/phantom.js', function(req, res) {
+	var filePath = '../web-appmanager/phantom.js';
+	retrieve_file(filePath,res);
+});
+
 app.get('/appmanager.js', function(req, res) {
 	var filePath = '../web-appmanager/appmanager.js';
 	retrieve_file(filePath,res);
