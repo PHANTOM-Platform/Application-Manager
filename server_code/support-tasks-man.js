@@ -97,7 +97,24 @@ find_project_id: function(es_server, my_index, project){
 //****************************************************
 //This function is used to confirm that a project exists or not in the DataBase.
 //We first counted if existence is >0
-find_project: function(es_server, my_index, project, pretty){
+find_project: function(es_server, my_index, project, pretty, mysorttype){
+	var filter = [ { "project": { "order": "asc" }} ];
+	if (mysorttype!=undefined){
+		if (mysorttype== "901"){
+			filter = [ {"_id":{ "order":"desc"}}, { "project": { "order": "asc" }} ];
+		} else if (mysorttype== "902"){
+			filter = [ {"development.completed":{ "order":"asc"}}, { "project": { "order": "asc" }} ];
+		} else if (mysorttype== "903"){
+			filter = [ {"pt_ca.completed":{ "order":"asc"}}, { "project": { "order": "asc" }} ];
+		} else if (mysorttype== "904"){
+			filter = [ {"mbt_early_validation.completed":{ "order":"asc"}}, { "project": { "order": "asc" }} ];
+		} else if (mysorttype== "905"){
+			filter = [ {"ip_core_generator.completed":{ "order":"asc"}}, { "project": { "order": "asc" }} ];
+		} else if (mysorttype== "906"){
+			filter = [ {"mom.completed":{ "order":"asc"}}, { "project": { "order": "asc" }} ];
+		}
+	}
+	
 	return new Promise( (resolve,reject) => {
 		var elasticsearch = require('elasticsearch');
 		var client = new elasticsearch.Client({
@@ -107,11 +124,12 @@ find_project: function(es_server, my_index, project, pretty){
 		if(project==undefined){
 			resolve({});
 		}else if(project.length==0){
+			var myquery = {"query":{"match_all": {} }, "sort": filter };
 			client.search({
 				index: my_index,
 				type: my_type,
 				size: 10000,
-				body:{"query":{"match_all": {} }, "sort": { "project": { "order": "asc" }}}
+				body: myquery
 			}, function(error, response) {
 				if (error){
 					reject("search error: "+error)
