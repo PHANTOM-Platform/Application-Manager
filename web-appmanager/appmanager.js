@@ -108,6 +108,34 @@ function applogin(user,password){
 }
 
 
+function build_app_cell(input_source) {
+	var html="";
+	if(input_source!=undefined){
+		if(input_source['completed']!=undefined){
+		if(input_source['completed']=="true"){	
+			input_source['status']="finished";
+		}}
+		if(input_source['status']==undefined){
+			html += "<td bgcolor=\"#f3ff3a\"";
+			input_source['status']="waiting";
+		}else if(input_source['status']=="waiting"){ //yellow
+			html += "<td bgcolor=\"#f3ff3a\"";
+		}else if(input_source['status']=="finished"){//green
+			html += "<td bgcolor=\"#00FF00\"";
+		}else if(input_source['status']=="cancelled"){//red
+			html += "<td bgcolor=\"#ff3e29\"";
+		}else if(input_source['status']=="started"){//green
+			html += "<td bgcolor=\"#00FF00\"";
+		}else{
+			html += "<td";
+		}
+		html += " align=\"center\"><font color=\"black\">" + input_source['status'];
+	}else{
+		html += "<td bgcolor=\"#f3ff3a\" align=\"center\"><font color=\"black\">waiting";
+	}
+	html += "&nbsp;</font></td>\n";
+	return html;
+}
 
 
 
@@ -115,16 +143,18 @@ function applogin(user,password){
 function jsontotable_app_brief(myjson,count,first,level,lastwascoma,mtitle,filtered_fields){
 	var html ="";
 	var i;
+	var counter=1;
 // 	if(first==true){ html ="{"; }
 	var mainc=mtitle;
 	if(mtitle==true){
 		html += "<div><table style='border:1px solid black'>\n";// style='width:100%'>";
-		html += "<td><strong><center>id</center></strong></td><th><strong>&nbsp; Project &nbsp;</strong> </th>\n";
-		html += "<td><strong>&nbsp; Development &nbsp;</strong></td>\n";
-		html += "<td><strong>&nbsp; PT code analysis&nbsp;</strong></td>\n";
-		html += "<td><strong>&nbsp; MBT early validation &nbsp;</strong></td>\n";
-		html += "<td><strong>&nbsp; IP core generator&nbsp;</strong></td>\n";
-		html += "<td><strong>&nbsp; MOM &nbsp;</strong></td>\n";
+		html += "<td>#</td><td><strong><center><a onclick=\"return list_apps(901,document.getElementById('appname').value)\">id</a></center></strong></td>\n";
+		html += "<th><strong>&nbsp;<a onclick=\"return list_apps(6,document.getElementById('appname').value)\"> Project &nbsp;</a></strong> </th>\n";
+		html += "<td><strong>&nbsp;<a onclick=\"return list_apps(902,document.getElementById('appname').value)\"> Development &nbsp;</a></strong></td>\n";
+		html += "<td><strong>&nbsp;<a onclick=\"return list_apps(903,document.getElementById('appname').value)\"> PT code analysis&nbsp;</a></strong></td>\n";
+		html += "<td><strong>&nbsp;<a onclick=\"return list_apps(904,document.getElementById('appname').value)\"> MBT early validation &nbsp;</a></strong></td>\n";
+		html += "<td><strong>&nbsp;<a onclick=\"return list_apps(905,document.getElementById('appname').value)\"> IP core generator&nbsp;</a></strong></td>\n";
+		html += "<td><strong>&nbsp;<a onclick=\"return list_apps(906,document.getElementById('appname').value)\"> MOM &nbsp;</a></strong></td>\n";
 		count++;
 	}
 	var countseries=0;
@@ -157,133 +187,14 @@ function jsontotable_app_brief(myjson,count,first,level,lastwascoma,mtitle,filte
 // 							html += "</table></div></td><br>\n";
 // 							html += "<div><table style='border:1px solid black'>\n";// style='width:100%'>";
 						}
-						html += "<td> " + val['_id'] +" </td>\n";
+						html += "<td>"+counter+"</td><td> " + val['_id'] +" </td>\n";
 						html += "<th> &nbsp;" + val['project'] +"&nbsp; </th>\n";
-						//source
-						if(val['source']!=undefined){
-							if(val['source']['completed']!=undefined){
-							if(val['source']['completed']=="true"){	
-								val['source']['status']="finished";
-							}}
-							if(val['source']['status']==undefined){
-								html += "<td bgcolor=\"#f3ff3a\">";
-								val['source']['status']="waiting";
-							}else if(val['source']['status']=="waiting"){ //yellow
-								html += "<td bgcolor=\"#f3ff3a\">";
-							}else if(val['source']['status']=="finished"){//green
-								html += "<td bgcolor=\"#00FF00\">";
-							}else if(val['source']['status']=="cancelled"){//red
-								html += "<td bgcolor=\"#ff3e29\">";
-							}else if(val['source']['status']=="started"){//green
-								html += "<td bgcolor=\"#00FF00\">";
-							}else{
-								html += "<td>";
-							}
-							html += "<font color=\"black\">&nbsp;" + val['source']['status'];
-						}else{
-							html += "<td bgcolor=\"#f3ff3a\"><font color=\"black\">&nbsp;waiting";
-						}
-						html += "&nbsp;</font></td>\n";
-						//pt
-						if(val['pt_ca']!=undefined){
-							if(val['pt_ca']['completed']!=undefined){
-							if(val['pt_ca']['completed']=="true"){	
-								val['pt_ca']['status']="finished";
-							}}
-							if(val['pt_ca']['status']==undefined){
-								html += "<td bgcolor=\"#f3ff3a\">";
-								val['pt_ca']['status']="waiting";
-							}else if(val['pt_ca']['status']=="waiting"){ //yellow
-								html += "<td bgcolor=\"#f3ff3a\">";
-							}else if(val['pt_ca']['status']=="finished"){//green
-								html += "<td bgcolor=\"#00FF00\">";
-							}else if(val['pt_ca']['status']=="cancelled"){//red
-								html += "<td bgcolor=\"#ff3e29\">";
-							}else if(val['pt_ca']['status']=="started"){//green
-								html += "<td bgcolor=\"#00FF00\">";
-							}else{
-								html += "<td>";
-							}
-							html += "<font color=\"black\">&nbsp;" + val['pt_ca']['status'];
-						}else{
-							html += "<td bgcolor=\"#f3ff3a\"><font color=\"black\">&nbsp;waiting";
-						}
-						html += "&nbsp;</font></td>\n";
-						//mbt_early_validation
-						if(val['mbt_early_validation']!=undefined){
-							if(val['mbt_early_validation']['completed']!=undefined){
-							if(val['mbt_early_validation']['completed']=="true"){	
-								val['mbt_early_validation']['status']="finished";
-							}}
-							if(val['mbt_early_validation']['status']==undefined){
-								html += "<td bgcolor=\"#f3ff3a\">";
-								val['mbt_early_validation']['status']="waiting";
-							}else if(val['mbt_early_validation']['status']=="waiting"){ //yellow
-								html += "<td bgcolor=\"#f3ff3a\">";
-							}else if(val['mbt_early_validation']['status']=="finished"){//green
-								html += "<td bgcolor=\"#00FF00\">";
-							}else if(val['mbt_early_validation']['status']=="cancelled"){//red
-								html += "<td bgcolor=\"#ff3e29\">";
-							}else if(val['mbt_early_validation']['status']=="started"){//green
-								html += "<td bgcolor=\"#00FF00\">";
-							}else{
-								html += "<td>";
-							}
-							html += "<font color=\"black\">&nbsp;"+val['mbt_early_validation']['status'];
-						}else{
-							html += "<td bgcolor=\"#f3ff3a\"><font color=\"black\">&nbsp;waiting";
-						}
-						html += "&nbsp;</font></td>\n";
-						//ip_core_generator
-						if(val['ip_core_generator']!=undefined){
-							if(val['ip_core_generator']['completed']!=undefined){
-							if(val['ip_core_generator']['completed']=="true"){	
-								val['ip_core_generator']['status']="finished";
-							}}
-							if(val['ip_core_generator']['status']==undefined){
-								html += "<td bgcolor=\"#f3ff3a\">";
-								val['ip_core_generator']['status']="waiting";
-							}else if(val['ip_core_generator']['status']=="waiting"){ //yellow
-								html += "<td bgcolor=\"#f3ff3a\">";
-							}else if(val['ip_core_generator']['status']=="finished"){//green
-								html += "<td bgcolor=\"#00FF00\">" ;
-							}else if(val['ip_core_generator']['status']=="cancelled"){//red
-								html += "<td bgcolor=\"#ff3e29\">" ;
-							}else if(val['ip_core_generator']['status']=="started"){//green
-								html += "<td bgcolor=\"#00FF00\">";
-							}else{
-								html += "<td>";
-							}
-							html += "<font color=\"black\">" +val['ip_core_generator']['status'];
-						}else{
-							html += "<td bgcolor=\"#f3ff3a\"><font color=\"black\">&nbsp;waiting";
-						}
-						html += "&nbsp;</font></td>\n";
-						//mom
-						if(val['mom'] !=undefined){
-							if(val['mom']['completed']!=undefined){
-							if(val['mom']['completed']=="true"){	
-								val['mom']['status']="finished";
-							}}
-							if(val['mom']['status']==undefined){
-								html += "<td bgcolor=\"#f3ff3a\">";
-								val['mom']['status']="waiting";
-							}else if(val['mom']['status']=="waiting"){ //yellow
-								html += "<td bgcolor=\"#f3ff3a\">";
-							}else if(val['mom']['status']=="finished"){//green
-								html += "<td bgcolor=\"#00FF00\">";
-							}else if(val['mom']['status']=="cancelled"){//red
-								html += "<td bgcolor=\"#ff3e29\">";
-							}else if(val['mom']['status']=="started"){//green
-								html += "<td bgcolor=\"#00FF00\">";
-							}else{
-								html += "<td>";
-							}
-							html += "<font color=\"black\">&nbsp;" + val['mom']['status'];
-						}else{
-							html += "<td bgcolor=\"#f3ff3a\"><font color=\"black\">&nbsp;waiting";
-						}
-						html += "&nbsp;</font></td>\n";
+						counter++;
+						html += build_app_cell(val['source']);
+						html += build_app_cell(val['pt_ca']); 
+						html += build_app_cell(val['mbt_early_validation']);
+						html += build_app_cell(val['ip_core_generator']); 
+						html += build_app_cell(val['mom']); 
 						mtitle=false;
 						count++;
 						lastwascoma=false;
@@ -337,8 +248,6 @@ function jsontotable_app_brief(myjson,count,first,level,lastwascoma,mtitle,filte
 }//jsontotable_app_brief
 
 
-
-
 // const sleep = (milliseconds) => {
 // return new Promise(resolve => setTimeout(resolve, milliseconds))
 // }
@@ -357,7 +266,7 @@ function update_app_with_token( UploadJSON ) {
 }
 
 function list_apps(mytype,appname){
-	var url = build_appman_path() + "/get_app_list?project=\""+appname+"\"";//?pretty='true'";
+	var url = build_appman_path() + "/get_app_list?sorttype="+mytype+"&project=\""+appname+"\"";
 	list_results(mytype,url,["_id"],["_length"]);
 	return false;
 }
