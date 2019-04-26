@@ -272,7 +272,7 @@ function list_apps(mytype,appname){
 }
 
 function list_app_logs(mytype,appname){// will list projects
-	var url = build_appman_path() + "/get_log_list?pretty='true'";
+	var url = build_appman_path() + "/get_log_list?sorttype="+mytype+"&pretty='true'";
 	list_results(mytype,url,["host"],["_length","_index","_type","_score","sort"]);
 	return false;
 }
