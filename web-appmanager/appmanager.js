@@ -148,13 +148,13 @@ function jsontotable_app_brief(myjson,count,first,level,lastwascoma,mtitle,filte
 	var mainc=mtitle;
 	if(mtitle==true){
 		html += "<div><table style='border:1px solid black'>\n";// style='width:100%'>";
-		html += "<td>#</td><td><strong><center><a onclick=\"return list_apps(901,document.getElementById('appname').value)\">id</a></center></strong></td>\n";
-		html += "<th><strong>&nbsp;<a onclick=\"return list_apps(6,document.getElementById('appname').value)\"> Project &nbsp;</a></strong> </th>\n";
-		html += "<td><strong>&nbsp;<a onclick=\"return list_apps(902,document.getElementById('appname').value)\"> Development &nbsp;</a></strong></td>\n";
-		html += "<td><strong>&nbsp;<a onclick=\"return list_apps(903,document.getElementById('appname').value)\"> PT code analysis&nbsp;</a></strong></td>\n";
-		html += "<td><strong>&nbsp;<a onclick=\"return list_apps(904,document.getElementById('appname').value)\"> MBT early validation &nbsp;</a></strong></td>\n";
-		html += "<td><strong>&nbsp;<a onclick=\"return list_apps(905,document.getElementById('appname').value)\"> IP core generator&nbsp;</a></strong></td>\n";
-		html += "<td><strong>&nbsp;<a onclick=\"return list_apps(906,document.getElementById('appname').value)\"> MOM &nbsp;</a></strong></td>\n";
+		html += "<td>#</td><td style=\"text-align:center\"><center><a onclick=\"return list_apps(901,document.getElementById('appname').value)\" class=\"under-logs\">id</a></center></td>\n";
+		html += "<td style=\"text-align:center\">&nbsp;<a onclick=\"return list_apps(6,document.getElementById('appname').value)\" class=\"under-logs\">Project </a>&nbsp;</td>\n";
+		html += "<td>&nbsp;<a onclick=\"return list_apps(902,document.getElementById('appname').value)\" class=\"under-logs\"> Development </a>&nbsp;</td>\n";
+		html += "<td>&nbsp;<a onclick=\"return list_apps(903,document.getElementById('appname').value)\" class=\"under-logs\"> PT code analysis</a>&nbsp;</td>\n";
+		html += "<td>&nbsp;<a onclick=\"return list_apps(904,document.getElementById('appname').value)\" class=\"under-logs\"> MBT early validation </a>&nbsp;</td>\n";
+		html += "<td>&nbsp;<a onclick=\"return list_apps(905,document.getElementById('appname').value)\" class=\"under-logs\"> IP core generator&nbsp;</a></td>\n";
+		html += "<td>&nbsp;<a onclick=\"return list_apps(906,document.getElementById('appname').value)\" class=\"under-logs\"> MOM </a>&nbsp;</td>\n";
 		count++;
 	}
 	var countseries=0;
