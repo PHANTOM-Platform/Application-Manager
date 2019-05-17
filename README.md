@@ -201,7 +201,8 @@ Please [create](https://github.com/jmmontanana/phantom_repository/issues) an iss
 ## Release History
 | Date        | Version | Comment          |
 | ----------- | ------- | ---------------- |
-| 2018-03-22  | 1.0     | First prototype  |
+| 2018-03-22  | 0.9.0     | First prototype  |
+| 2019-05-15  | 1.0.0     | Tested with Real Use Cases  |
 
 ## License
 Copyright (C) 2018 University of Stuttgart
