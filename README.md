@@ -107,7 +107,7 @@ Please take a look on the next suggested reference books, if you face difficulti
 * [Elasticsearch Cookbook][Elasticsearch Cookbook]
 
 
-## 4.- Start/Stop the server
+## 3.- Start/Stop the server
 
 #### 1.- The PHANTOM APP-MANAGER relies on the Elasticsearch running on the SAME server. 
 
@@ -145,7 +145,7 @@ bash stop-appmanager.sh;
 ```
 
 
-## 5.- Configuration of USERS' accounts
+## 4.- Configuration of USERS' accounts
 
 After the installation, and before users can use the repository, it is needed to register the users.
 
@@ -159,6 +159,10 @@ bash setup-new-app-manager-server.sh
 
 NOTICE: For securoity reasons, users' accounts can be ONLY registered on the server. Requests from different IPs will be rejected.
         
+## 5.- RESTful API Queries
+ 
+Please refer to the [Reference Manual of the RESTful API][apimanual] to get more details.
+The Manual contains a description of each of the implemented methods, with examples of use, and type of possible responses. 
 
 
 ## 6.- Example of use
@@ -220,5 +224,5 @@ Copyright (C) 2018 University of Stuttgart
 [server]: https://github.com/PHANTOM-Platform/Monitoring/tree/master/Monitoring_server
 [excess]: http://www.excess-project.eu
 [phantom]: http://www.phantom-project.org
-
+[apimanual]:https://phantom-platform.github.io/Application-Manager/
 
