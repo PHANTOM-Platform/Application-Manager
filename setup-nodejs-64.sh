@@ -14,7 +14,7 @@
 #  limitations under the License.
 
 # GLOBAL VARIABLES
-	SERVER_DIR=~/phantom_servers; 
+	SERVER_DIR=~/phantom_servers;
 	BASE_DIR=`dirname $0`;
 	cd ${BASE_DIR};
 	BASE_DIR=`pwd`;
@@ -30,7 +30,7 @@
 		mkdir ${DIST_DIR};
 	fi;
 # SOFTWARE
-	NODE_JS_VERSION="9.4.0";
+	NODE_JS_VERSION="13.12.0";
 	NODE_JS="node-v${NODE_JS_VERSION}-linux-x64";
 # REQUIRED SOFTWARE CHECKS
 # > git and wget
@@ -39,15 +39,15 @@
 	command -v git >/dev/null 2>&1 || { echo " git  : Not installed. Aborting." >&2; exit 1; }
 	echo "> wget";
 	command -v wget >/dev/null 2>&1 || { echo " wget  : Not installed. Aborting." >&2; exit 1; }
-	echo -e "Done.\n"; 
+	echo -e "Done.\n";
 # DOWNLOADING AND INSTALLING EXTERNAL DEPENDENCIES
 # > node.js and npm
 	cd ${TMP_DIR};
 	echo -e "Installing external dependencies:\n > node.js";
-	if [ ! -f "${NODE_JS}.tar.gz" ]; then 
+	if [ ! -f "${NODE_JS}.tar.gz" ]; then
 		wget https://nodejs.org/dist/v${NODE_JS_VERSION}/${NODE_JS}.tar.gz;
 	fi;
-	if [ ! -d "${DIST_DIR}/${NODE_JS}" ]; then 
+	if [ ! -d "${DIST_DIR}/${NODE_JS}" ]; then
 		tar -xf ${NODE_JS}.tar.gz;
 		rm -fr ${DIST_DIR}/nodejs;
 		mv ${NODE_JS} ${DIST_DIR}/nodejs;
